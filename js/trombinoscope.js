@@ -1,7 +1,7 @@
 /**
- * Gestionnaire du trombinoscope avec filtrage par équipe
- * Charge et affiche les employés selon la hiérarchie organisationnelle
- * Niveau de confiance: 88%
+ * Gestionnaire du trombinoscope avec filtrage par équipe corrigé
+ * Affiche direction avec managers et gère correctement le filtrage
+ * Niveau de confiance: 92%
  */
 
 class TrombinoscopeManager {
@@ -45,6 +45,7 @@ class TrombinoscopeManager {
         try {
             this.employees = await dataManager.getData('employees.json');
             this.filteredEmployees = [...this.employees];
+            console.log('Employés chargés:', this.employees);
         } catch (error) {
             console.error('Erreur de chargement des employés:', error);
             throw error;
@@ -60,6 +61,7 @@ class TrombinoscopeManager {
         filterButtons.forEach(button => {
             button.addEventListener('click', (e) => {
                 const team = e.target.dataset.team;
+                console.log('Filtre sélectionné:', team);
                 this.filterByTeam(team);
                 this.updateActiveFilter(e.target);
             });
@@ -67,18 +69,30 @@ class TrombinoscopeManager {
     }
 
     /**
-     * Filtre les employés par équipe
+     * Filtre les employés par équipe avec logique corrigée
      * @param {string} teamFilter - Filtre d'équipe à appliquer
      */
     filterByTeam(teamFilter) {
         this.currentFilter = teamFilter;
+        console.log('Application du filtre:', teamFilter);
         
         if (teamFilter === 'all') {
             this.filteredEmployees = [...this.employees];
-        } else {
+        } else if (teamFilter === 'direction') {
+            // Direction inclut responsable + tous les managers
             this.filteredEmployees = this.employees.filter(employee => 
-                employee.team.toLowerCase().replace(' ', '') === teamFilter
+                employee.position.toLowerCase().includes('responsable') ||
+                employee.position.toLowerCase().includes('manager')
             );
+        } else {
+            // Filtrage par équipe spécifique (equipe1, equipe2, etc.)
+            const teamNumber = teamFilter.replace('equipe', '');
+            const teamName = `Équipe ${teamNumber}`;
+            
+            this.filteredEmployees = this.employees.filter(employee => 
+                employee.team === teamName
+            );
+            console.log(`Employés filtrés pour ${teamName}:`, this.filteredEmployees);
         }
         
         this.renderTrombinoscope();
@@ -105,16 +119,43 @@ class TrombinoscopeManager {
     }
 
     /**
-     * Affiche la section direction
+     * Affiche la section direction avec responsable et managers
      */
     renderDirection() {
         const directionGrid = document.getElementById('direction-grid');
-        const responsable = this.filteredEmployees.find(emp => 
-            emp.position.toLowerCase().includes('responsable')
-        );
-
-        if (responsable && (this.currentFilter === 'all' || this.currentFilter === 'direction')) {
-            directionGrid.innerHTML = this.createEmployeeCard(responsable, 'responsable');
+        
+        if (this.currentFilter === 'all' || this.currentFilter === 'direction') {
+            // Récupération du responsable et des managers
+            const responsable = this.filteredEmployees.find(emp => 
+                emp.position.toLowerCase().includes('responsable')
+            );
+            const managers = this.filteredEmployees.filter(emp => 
+                emp.position.toLowerCase().includes('manager')
+            );
+            
+            let directionHTML = '';
+            
+            // Ajout du responsable en premier
+            if (responsable) {
+                directionHTML += this.createEmployeeCard(responsable, 'responsable');
+            }
+            
+            // Ajout de tous les managers
+            managers.forEach(manager => {
+                directionHTML += this.createEmployeeCard(manager, 'manager');
+            });
+            
+            directionGrid.innerHTML = directionHTML;
+            
+            // Ajustement du style pour plusieurs cartes
+            if ((responsable ? 1 : 0) + managers.length > 1) {
+                directionGrid.style.display = 'grid';
+                directionGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
+                directionGrid.style.gap = '1rem';
+                directionGrid.style.justifyContent = 'center';
+                directionGrid.style.maxWidth = '800px';
+                directionGrid.style.margin = '0 auto';
+            }
         } else {
             directionGrid.innerHTML = '';
         }
@@ -138,7 +179,7 @@ class TrombinoscopeManager {
     }
 
     /**
-     * Organise les employés par équipe
+     * Organise les employés par équipe avec logique corrigée
      * @returns {Array} - Données organisées par équipe
      */
     getTeamsData() {
@@ -149,9 +190,21 @@ class TrombinoscopeManager {
             const teamName = `Équipe ${i}`;
             const teamKey = `equipe${i}`;
             
-            if (this.currentFilter === 'all' || this.currentFilter === teamKey) {
-                const teamEmployees = this.filteredEmployees.filter(emp => 
-                    emp.team === teamName && !emp.position.toLowerCase().includes('responsable')
+            // Logique de filtrage corrigée
+            let shouldShowTeam = false;
+            
+            if (this.currentFilter === 'all') {
+                shouldShowTeam = true;
+            } else if (this.currentFilter === teamKey) {
+                shouldShowTeam = true;
+            } else if (this.currentFilter === 'direction') {
+                shouldShowTeam = false; // Ne pas montrer les équipes en mode direction
+            }
+            
+            if (shouldShowTeam) {
+                const teamEmployees = this.employees.filter(emp => 
+                    emp.team === teamName && 
+                    !emp.position.toLowerCase().includes('responsable')
                 );
                 
                 if (teamEmployees.length > 0) {
@@ -165,11 +218,12 @@ class TrombinoscopeManager {
             }
         }
         
+        console.log('Équipes à afficher:', teams);
         return teams;
     }
 
     /**
-     * Crée l'élément HTML d'une équipe
+     * Crée l'élément HTML d'une équipe avec comptage corrigé
      * @param {Object} team - Données de l'équipe
      * @returns {HTMLElement} - Élément DOM de l'équipe
      */
@@ -181,18 +235,22 @@ class TrombinoscopeManager {
         const manager = team.employees.find(emp => 
             emp.position.toLowerCase().includes('manager')
         );
-        const conseiller = team.employees.find(emp => 
+        
+        // Comptage corrigé : conseillers clientèle + commerciaux = total commerciaux
+        const conseillerClientele = team.employees.filter(emp => 
             emp.position.toLowerCase().includes('conseiller clientèle')
         );
         const commerciaux = team.employees.filter(emp => 
             emp.position.toLowerCase().includes('conseiller commercial')
         );
         
+        const totalCommerciaux = conseillerClientele.length + commerciaux.length;
+        
         section.innerHTML = `
             <div class="team-header">
                 <h3 class="team-name">${team.name}</h3>
                 <div class="team-stats">
-                    ${team.employees.length} membre(s) - ${commerciaux.length} commercial(aux)
+                    ${team.employees.length} membre(s) - ${totalCommerciaux} commercial(aux)
                 </div>
             </div>
             <div class="employees-grid team-employees-grid">
@@ -266,6 +324,7 @@ class TrombinoscopeManager {
             directionSection.style.display = 'block';
             teamsSection.style.display = 'block';
         } else {
+            // Filtrage par équipe spécifique
             directionSection.style.display = 'none';
             teamsSection.style.display = 'block';
         }
