@@ -1,1 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trombinoscope - Fad'Arles</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/trombinoscope.css">
+</head>
+<body>
+    <!-- Navigation principale -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="../index.html"><h2>Fad'Arles</h2></a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Accueil</a></li>
+                <li><a href="trombinoscope.html" class="active">Trombinoscope</a></li>
+                <li><a href="agenda.html">Agenda</a></li>
+                <li><a href="blog.html">Événements</a></li>
+                <li><a href="bonnes-affaires.html">Bonnes Affaires</a></li>
+                <li><a href="activites-externes.html">Activités Externes</a></li>
+            </ul>
+            <div class="auth-section">
+                <button id="loginBtn" class="btn-auth">Connexion</button>
+                <div id="userProfile" class="user-profile hidden">
+                    <span id="userName"></span>
+                    <button id="logoutBtn" class="btn-logout">Déconnexion</button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
+    <!-- Contenu principal -->
+    <main class="main-content">
+        <header class="page-header">
+            <div class="header-content">
+                <h1>Trombinoscope CRC MACIF Arles</h1>
+                <p>Découvrez tous les membres de notre équipe</p>
+            </div>
+        </header>
+
+        <!-- Filtres d'équipe -->
+        <section class="team-filters">
+            <div class="filters-container">
+                <button class="filter-btn active" data-team="all">Toutes les équipes</button>
+                <button class="filter-btn" data-team="direction">Direction</button>
+                <button class="filter-btn" data-team="equipe1" data-color="#ff6b35">Équipe 1</button>
+                <button class="filter-btn" data-team="equipe2" data-color="#f7931e">Équipe 2</button>
+                <button class="filter-btn" data-team="equipe3" data-color="#ffb627">Équipe 3</button>
+                <button class="filter-btn" data-team="equipe4" data-color="#e74c3c">Équipe 4</button>
+                <button class="filter-btn" data-team="equipe5" data-color="#9b59b6">Équipe 5</button>
+                <button class="filter-btn" data-team="equipe6" data-color="#3498db">Équipe 6</button>
+            </div>
+        </section>
+
+        <!-- Section Direction -->
+        <section class="hierarchy-section" id="direction-section">
+            <h2 class="section-title">Direction</h2>
+            <div class="employees-grid direction-grid" id="direction-grid">
+                <!-- Responsable CRC sera chargé ici -->
+            </div>
+        </section>
+
+        <!-- Section Équipes -->
+        <section class="hierarchy-section" id="teams-section">
+            <h2 class="section-title">Équipes Commerciales</h2>
+            <div class="teams-container" id="teams-container">
+                <!-- Les équipes seront générées dynamiquement -->
+            </div>
+        </section>
+
+        <!-- Message de chargement -->
+        <div id="loading-message" class="loading-message">
+            <p>Chargement du trombinoscope...</p>
+        </div>
+
+        <!-- Message d'erreur -->
+        <div id="error-message" class="error-message hidden">
+            <p>Erreur lors du chargement des données. Veuillez réessayer.</p>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="../js/data-manager.js"></script>
+    <script src="../js/trombinoscope.js"></script>
+</body>
+</html>
