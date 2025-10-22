@@ -1,1 +1,14 @@
-
+[
+    {
+        "id": "ad_001",
+        "title": "Vélo d'appartement",
+        "description": "Vélo d'appartement en excellent état, peu utilisé",
+        "price": "150",
+        "category": "Sport",
+        "authorEmail": "marie.martin@macif.fr",
+        "authorName": "Marie Martin",
+        "createdAt": "2025-01-15T10:30:00Z",
+        "expiresAt": "2025-02-15T10:30:00Z",
+        "status": "active"
+    }
+]
