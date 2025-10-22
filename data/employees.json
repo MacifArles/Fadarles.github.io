@@ -1,1 +1,13 @@
-
+[
+    {
+        "id": "resp_001",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "position": "Responsable CRC",
+        "team": "Direction",
+        "email": "exemple@macif.fr",
+        "photo": "assets/images/placeholder.jpg",
+        "birthday": "1980-01-01",
+        "startDate": "2020-01-01"
+    }
+]
