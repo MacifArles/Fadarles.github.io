@@ -1,25 +1,57 @@
 [
-    {
-        "id": "resp_crc_001",
-        "firstName": "Jean",
-        "lastName": "Dupont",
-        "position": "Responsable CRC",
-        "team": "Direction",
-        "email": "jean.dupont@macif.fr",
-        "photo": "assets/images/jean-dupont.jpg",
-        "birthday": "1975-05-15",
-        "startDate": "2010-01-15"
-    },
-    {
-        "id": "manager_001",
-        "firstName": "Marie",
-        "lastName": "Martin",
-        "position": "Manager d'Équipe",
-        "team": "Équipe 1",
-        "teamColor": "#ff6b35",
-        "email": "marie.martin@macif.fr",
-        "photo": "assets/images/marie-martin.jpg",
-        "birthday": "1980-08-22",
-        "startDate": "2015-03-01"
-    }
+  {
+    "id": "resp_001",
+    "firstName": "Jean",
+    "lastName": "Dupont",
+    "position": "Responsable CRC",
+    "team": "Direction",
+    "email": "jean.dupont@macif.fr",
+    "photo": "assets/images/jean-dupont.jpg",
+    "birthday": "1975-05-15",
+    "startDate": "2010-01-15"
+  },
+  {
+    "id": "mgr_001",
+    "firstName": "Marie",
+    "lastName": "Martin",
+    "position": "Manager d'Équipe",
+    "team": "Équipe 1",
+    "email": "marie.martin@macif.fr",
+    "photo": "assets/images/marie-martin.jpg",
+    "birthday": "1980-08-22",
+    "startDate": "2015-03-01"
+  },
+  {
+    "id": "cc_001",
+    "firstName": "Pierre",
+    "lastName": "Durand",
+    "position": "Conseiller Clientèle",
+    "team": "Équipe 1",
+    "email": "pierre.durand@macif.fr",
+    "photo": "assets/images/pierre-durand.jpg",
+    "birthday": "1985-12-10",
+    "startDate": "2018-09-15"
+  },
+  {
+    "id": "com_001",
+    "firstName": "Sophie",
+    "lastName": "Bernard",
+    "position": "Conseiller Commercial",
+    "team": "Équipe 1",
+    "email": "sophie.bernard@macif.fr",
+    "photo": "assets/images/sophie-bernard.jpg",
+    "birthday": "1990-03-20",
+    "startDate": "2020-01-10"
+  },
+  {
+    "id": "mgr_002",
+    "firstName": "Luc",
+    "lastName": "Moreau",
+    "position": "Manager d'Équipe",
+    "team": "Équipe 2",
+    "email": "luc.moreau@macif.fr",
+    "photo": "assets/images/luc-moreau.jpg",
+    "birthday": "1978-07-14",
+    "startDate": "2012-05-20"
+  }
 ]
