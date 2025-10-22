@@ -1,1 +1,300 @@
+/* Styles spécifiques pour le trombinoscope */
+/* Niveau de confiance: 92% */
 
+.page-header {
+    text-align: center;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+}
+
+.header-content h1 {
+    font-size: 2.5rem;
+    background: linear-gradient(45deg, var(--primary-warm), var(--accent-warm));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.header-content p {
+    color: var(--text-light);
+    opacity: 0.8;
+    font-size: 1.1rem;
+}
+
+/* Filtres d'équipe */
+.team-filters {
+    margin-bottom: 3rem;
+    padding: 0 2rem;
+}
+
+.filters-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.filter-btn {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    color: var(--text-light);
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glass);
+}
+
+.filter-btn.active {
+    background: var(--primary-warm);
+    border-color: var(--primary-warm);
+    box-shadow: var(--shadow-glass);
+}
+
+/* Sections hiérarchiques */
+.hierarchy-section {
+    margin-bottom: 3rem;
+    padding: 0 2rem;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 2rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
+/* Grille direction */
+.direction-grid {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 3rem;
+}
+
+/* Conteneur des équipes */
+.teams-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Équipe individuelle */
+.team-section {
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.team-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--team-color, var(--primary-warm));
+}
+
+.team-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px 0 rgba(31, 38, 135, 0.4);
+}
+
+.team-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.team-name {
+    font-size: 1.3rem;
+    color: var(--team-color, var(--primary-warm));
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.team-stats {
+    color: var(--text-light);
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+/* Grille des employés */
+.employees-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.team-employees-grid {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+/* Carte employé */
+.employee-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 15px;
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.employee-card:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.employee-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 0.8rem;
+    border: 2px solid var(--team-color, var(--primary-warm));
+    background: var(--glass-bg);
+    display: block;
+}
+
+.employee-photo.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--team-color, var(--primary-warm));
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.employee-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 0.3rem;
+}
+
+.employee-position {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    opacity: 0.7;
+    margin-bottom: 0.3rem;
+}
+
+.employee-email {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    opacity: 0.6;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Badges de position */
+.position-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--team-color, var(--primary-warm));
+    color: white;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+/* Styles pour les différents niveaux hiérarchiques */
+.employee-card.manager {
+    border: 2px solid var(--team-color, var(--primary-warm));
+}
+
+.employee-card.responsable {
+    background: linear-gradient(135deg, var(--primary-warm), var(--secondary-warm));
+    border: none;
+    color: white;
+}
+
+.employee-card.responsable .employee-name,
+.employee-card.responsable .employee-position,
+.employee-card.responsable .employee-email {
+    color: white;
+    opacity: 1;
+}
+
+/* Messages de statut */
+.loading-message,
+.error-message {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-light);
+}
+
+.error-message {
+    background: rgba(231, 76, 60, 0.2);
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: 10px;
+    margin: 2rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filters-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .teams-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .team-employees-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+    
+    .employee-photo {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .header-content h1 {
+        font-size: 2rem;
+    }
+}
+
+/* Animation d'apparition */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.employee-card {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.team-section {
+    animation: fadeInUp 0.8s ease-out;
+}
