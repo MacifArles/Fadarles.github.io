@@ -1,1 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fad'Arles - Intranet CRC MACIF</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Navigation principale -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>Fad'Arles</h2>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html">Accueil</a></li>
+                <li><a href="pages/trombinoscope.html">Trombinoscope</a></li>
+                <li><a href="pages/agenda.html">Agenda</a></li>
+                <li><a href="pages/blog.html">Événements</a></li>
+                <li><a href="pages/bonnes-affaires.html">Bonnes Affaires</a></li>
+                <li><a href="pages/activites-externes.html">Activités Externes</a></li>
+            </ul>
+            <div class="auth-section">
+                <button id="loginBtn" class="btn-auth">Connexion</button>
+                <div id="userProfile" class="user-profile hidden">
+                    <span id="userName"></span>
+                    <button id="logoutBtn" class="btn-logout">Déconnexion</button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
+    <!-- Contenu principal -->
+    <main class="main-content">
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1>Bienvenue chez les Fad'Arles</h1>
+                <p>L'intranet du CRC MACIF d'Arles - Votre espace de convivialité et d'information</p>
+            </div>
+        </section>
+
+        <!-- Cartes d'accès rapide -->
+        <section class="quick-access">
+            <div class="cards-container">
+                <div class="card">
+                    <h3>👥 Trombinoscope</h3>
+                    <p>Découvrez tous les membres de notre équipe</p>
+                    <a href="pages/trombinoscope.html" class="card-link">Voir l'équipe</a>
+                </div>
+                
+                <div class="card">
+                    <h3>📅 Agenda</h3>
+                    <p>Anniversaires et événements à venir</p>
+                    <a href="pages/agenda.html" class="card-link">Consulter</a>
+                </div>
+                
+                <div class="card">
+                    <h3>📰 Événements</h3>
+                    <p>Actualités et activités du collectif</p>
+                    <a href="pages/blog.html" class="card-link">Lire les articles</a>
+                </div>
+                
+                <div class="card">
+                    <h3>💰 Bonnes Affaires</h3>
+                    <p>Petites annonces entre collègues</p>
+                    <a href="pages/bonnes-affaires.html" class="card-link">Voir les annonces</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de connexion -->
+    <div id="loginModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Connexion</h2>
+            <form id="loginForm">
+                <input type="email" id="email" placeholder="Votre email professionnel" required>
+                <button type="submit">Se connecter</button>
+            </form>
+            <p class="register-link">
+                Pas encore inscrit ? <a href="#" id="registerLink">Créer un compte</a>
+            </p>
+        </div>
+    </div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
