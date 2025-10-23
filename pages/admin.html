@@ -87,11 +87,13 @@
                 <!-- Filtres et recherche -->
                 <div class="filters-section">
                     <div class="search-group">
-                        <input type="text" id="search-employee" placeholder="🔍 Rechercher un employé...">
+                        <label for="search-employee">🔍 Recherche :</label>
+                        <input type="text" id="search-employee" placeholder="Nom, prénom, poste...">
                     </div>
                     <div class="filter-group">
+                        <label for="filter-team">🏢 Équipe :</label>
                         <select id="filter-team">
-                            <option value="">Toutes les équipes</option>
+                            <option value="">-- Toutes les équipes --</option>
                             <option value="Direction">Direction</option>
                             <option value="Equipe 1">Équipe 1</option>
                             <option value="Equipe 2">Équipe 2</option>
@@ -101,7 +103,10 @@
                             <option value="Equipe 6">Équipe 6</option>
                         </select>
                     </div>
-                    <button id="refresh-employees" class="btn-secondary">🔄 Actualiser</button>
+                    <div class="action-group">
+                        <button id="refresh-employees" class="btn-secondary">🔄 Actualiser</button>
+                        <button id="clear-filters" class="btn-secondary">🗑️ Effacer</button>
+                    </div>
                 </div>
 
                 <!-- Liste des employés -->
@@ -410,8 +415,18 @@
             
             if (!container) return;
 
+            // Debug pour voir ce qui est rendu
+            console.log(`🔍 Rendu: ${employeesToRender.length} employés à afficher`);
+            console.log(`📊 Employés reçus:`, employeesToRender.map(e => `${e.firstName} ${e.lastName} (${e.team})`));
+
             if (employeesToRender.length === 0) {
-                container.innerHTML = '<div class="no-employees">Aucun employé trouvé</div>';
+                container.innerHTML = `
+                    <div class="no-employees">
+                        <h3>😔 Aucun employé trouvé</h3>
+                        <p>Aucun employé ne correspond aux critères de recherche.</p>
+                        <button onclick="clearFilters()" class="btn-secondary">🗑️ Effacer les filtres</button>
+                    </div>
+                `;
                 return;
             }
 
@@ -423,9 +438,11 @@
                          onerror="this.src='../assets/images/default-avatar.png'">
                     <div class="employee-info">
                         <h4>${escapeHtml(employee.firstName || '')} ${escapeHtml(employee.lastName || '')}</h4>
-                        <p><strong>${escapeHtml(employee.position || '')}</strong></p>
+                        <p><strong>📋 ${escapeHtml(employee.position || '')}</strong></p>
                         <p>📧 ${escapeHtml(employee.email || 'Pas d\'email')}</p>
-                        <span class="employee-team team-${getTeamClass(employee.team)}">${escapeHtml(employee.team || '')}</span>
+                        <span class="employee-team team-${getTeamClass(employee.team)}">🏢 ${escapeHtml(employee.team || '')}</span>
+                        ${employee.birthday ? `<p>🎂 ${new Date(employee.birthday).toLocaleDateString('fr-FR')}</p>` : ''}
+                        ${employee.startDate ? `<p>📅 Arrivée: ${new Date(employee.startDate).toLocaleDateString('fr-FR')}</p>` : ''}
                     </div>
                     <div class="employee-actions">
                         <button class="btn-edit" onclick="editEmployee('${employee.id}')">
@@ -501,24 +518,67 @@
 
         // Filtrage des employés
         function filterEmployees() {
-            const searchTerm = document.getElementById('search-employee')?.value.toLowerCase() || '';
-            const teamFilter = document.getElementById('filter-team')?.value || '';
+            const searchTerm = document.getElementById('search-employee')?.value.toLowerCase().trim() || '';
+            const teamFilter = document.getElementById('filter-team')?.value.trim() || '';
+            
+            console.log(`🔍 Filtrage avec: recherche="${searchTerm}", équipe="${teamFilter}"`);
+            console.log(`📊 ${employees.length} employés au total`);
             
             let filtered = [...employees];
 
+            // Filtrage par terme de recherche
             if (searchTerm) {
-                filtered = filtered.filter(emp => 
-                    (emp.firstName || '').toLowerCase().includes(searchTerm) ||
-                    (emp.lastName || '').toLowerCase().includes(searchTerm) ||
-                    (emp.position || '').toLowerCase().includes(searchTerm)
-                );
+                filtered = filtered.filter(emp => {
+                    const firstName = (emp.firstName || '').toLowerCase();
+                    const lastName = (emp.lastName || '').toLowerCase();
+                    const position = (emp.position || '').toLowerCase();
+                    const email = (emp.email || '').toLowerCase();
+                    
+                    const match = firstName.includes(searchTerm) ||
+                                lastName.includes(searchTerm) ||
+                                position.includes(searchTerm) ||
+                                email.includes(searchTerm);
+                    
+                    return match;
+                });
+                console.log(`🔍 Après recherche: ${filtered.length} employés`);
             }
 
+            // Filtrage par équipe
             if (teamFilter) {
-                filtered = filtered.filter(emp => emp.team === teamFilter);
+                filtered = filtered.filter(emp => {
+                    const match = emp.team === teamFilter;
+                    console.log(`👥 ${emp.firstName} ${emp.lastName}: équipe="${emp.team}", filtre="${teamFilter}", match=${match}`);
+                    return match;
+                });
+                console.log(`🏢 Après filtre équipe: ${filtered.length} employés`);
             }
 
+            console.log(`✅ Résultat final: ${filtered.length} employés`);
             renderEmployeesList(filtered);
+            
+            // Mise à jour de l'interface
+            updateFilterStatus(searchTerm, teamFilter, filtered.length);
+        }
+
+        // Fonction pour effacer les filtres
+        function clearFilters() {
+            document.getElementById('search-employee').value = '';
+            document.getElementById('filter-team').value = '';
+            renderEmployeesList();
+            updateFilterStatus('', '', employees.length);
+            showNotification('Filtres effacés', 'success');
+        }
+
+        // Mise à jour du statut des filtres
+        function updateFilterStatus(searchTerm, teamFilter, resultCount) {
+            const statusText = [];
+            if (searchTerm) statusText.push(`Recherche: "${searchTerm}"`);
+            if (teamFilter) statusText.push(`Équipe: ${teamFilter}`);
+            
+            if (statusText.length > 0) {
+                console.log(`📊 Filtres actifs: ${statusText.join(', ')} - ${resultCount} résultat(s)`);
+            }
         }
 
         // Placeholder pour les fonctions d'édition
@@ -580,6 +640,7 @@
             document.getElementById('search-employee')?.addEventListener('input', filterEmployees);
             document.getElementById('filter-team')?.addEventListener('change', filterEmployees);
             document.getElementById('refresh-employees')?.addEventListener('click', loadEmployees);
+            document.getElementById('clear-filters')?.addEventListener('click', clearFilters);
 
             // Actions de maintenance
             document.getElementById('clear-cache')?.addEventListener('click', function() {
