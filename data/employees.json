@@ -16,83 +16,119 @@
     "lastName": "Fane",
     "position": "Manager d'Équipe",
     "team": "Équipe 1",
-    "email": "Kfane@macif.fr",
+    "email": "khady.fane@macif.fr",
     "photo": "assets/images/khady-fane.jpg",
     "birthday": "1980-08-22",
     "startDate": "2015-03-01"
   },
   {
     "id": "mgr_002",
-    "firstName": "Luc",
-    "lastName": "Moreau",
+    "firstName": "Marc",
+    "lastName": "Dupuis",
     "position": "Manager d'Équipe",
     "team": "Équipe 2",
-    "email": "luc.moreau@macif.fr",
-    "photo": "assets/images/luc-moreau.jpg",
+    "email": "marc.dupuis@macif.fr",
+    "photo": "assets/images/marc-dupuis.jpg",
     "birthday": "1978-07-14",
     "startDate": "2012-05-20"
-  }
+  },
   {
     "id": "mgr_003",
-    "firstName": "Luc",
-    "lastName": "Moreau",
+    "firstName": "Claire",
+    "lastName": "Martin",
     "position": "Manager d'Équipe",
     "team": "Équipe 3",
-    "email": "luc.moreau@macif.fr",
-    "photo": "assets/images/luc-moreau.jpg",
-    "birthday": "1978-07-14",
-    "startDate": "2012-05-20"
-  }
-
+    "email": "claire.martin@macif.fr",
+    "photo": "assets/images/claire-martin.jpg",
+    "birthday": "1982-03-12",
+    "startDate": "2016-08-15"
+  },
   {
     "id": "mgr_004",
-    "firstName": "Luc",
-    "lastName": "Moreau",
+    "firstName": "David",
+    "lastName": "Rousseau",
     "position": "Manager d'Équipe",
     "team": "Équipe 4",
-    "email": "luc.moreau@macif.fr",
-    "photo": "assets/images/luc-moreau.jpg",
-    "birthday": "1978-07-14",
-    "startDate": "2012-05-20"
-  }
-
+    "email": "david.rousseau@macif.fr",
+    "photo": "assets/images/david-rousseau.jpg",
+    "birthday": "1979-11-08",
+    "startDate": "2013-02-10"
+  },
   {
     "id": "mgr_005",
-    "firstName": "Luc",
-    "lastName": "Moreau",
+    "firstName": "Julie",
+    "lastName": "Bernard",
     "position": "Manager d'Équipe",
     "team": "Équipe 5",
-    "email": "luc.moreau@macif.fr",
-    "photo": "assets/images/luc-moreau.jpg",
-    "birthday": "1978-07-14",
-    "startDate": "2012-05-20"
-  }
-
-  
+    "email": "julie.bernard@macif.fr",
+    "photo": "assets/images/julie-bernard.jpg",
+    "birthday": "1984-09-25",
+    "startDate": "2017-04-03"
+  },
+  {
+    "id": "mgr_006",
+    "firstName": "Thomas",
+    "lastName": "Leclerc",
+    "position": "Manager d'Équipe",
+    "team": "Équipe 6",
+    "email": "thomas.leclerc@macif.fr",
+    "photo": "assets/images/thomas-leclerc.jpg",
+    "birthday": "1981-06-18",
+    "startDate": "2014-11-22"
+  },
   {
     "id": "cc_001",
     "firstName": "Kelly",
-    "lastName": "Le bouhris",
+    "lastName": "Le Bouhris",
     "position": "Conseiller Clientèle",
     "team": "Équipe 1",
-    "email": "pierre.durand@macif.fr",
-    "photo": "assets/images/pierre-durand.jpg",
+    "email": "kelly.lebouhris@macif.fr",
+    "photo": "assets/images/kelly-lebouhris.jpg",
     "birthday": "1985-12-10",
     "startDate": "2018-09-15"
   },
   {
     "id": "com_001",
     "firstName": "Sophie",
-    "lastName": "Bernard",
+    "lastName": "Moreau",
     "position": "Conseiller Commercial",
     "team": "Équipe 1",
-    "email": "sophie.bernard@macif.fr",
-    "photo": "assets/images/sophie-bernard.jpg",
+    "email": "sophie.moreau@macif.fr",
+    "photo": "assets/images/sophie-moreau.jpg",
     "birthday": "1990-03-20",
     "startDate": "2020-01-10"
   },
-  
- 
-  
-
+  {
+    "id": "com_002",
+    "firstName": "Alexandre",
+    "lastName": "Dubois",
+    "position": "Conseiller Commercial",
+    "team": "Équipe 1",
+    "email": "alexandre.dubois@macif.fr",
+    "photo": "assets/images/alexandre-dubois.jpg",
+    "birthday": "1988-07-15",
+    "startDate": "2019-06-01"
+  },
+  {
+    "id": "cc_002",
+    "firstName": "Marine",
+    "lastName": "Petit",
+    "position": "Conseiller Clientèle",
+    "team": "Équipe 2",
+    "email": "marine.petit@macif.fr",
+    "photo": "assets/images/marine-petit.jpg",
+    "birthday": "1987-04-03",
+    "startDate": "2017-12-01"
+  },
+  {
+    "id": "com_003",
+    "firstName": "Julien",
+    "lastName": "Garcia",
+    "position": "Conseiller Commercial",
+    "team": "Équipe 2",
+    "email": "julien.garcia@macif.fr",
+    "photo": "assets/images/julien-garcia.jpg",
+    "birthday": "1991-01-28",
+    "startDate": "2021-03-15"
+  }
 ]
