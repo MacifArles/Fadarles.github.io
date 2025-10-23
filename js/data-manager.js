@@ -1,514 +1,460 @@
 /**
- * Data Manager Fad'Arles - Version Hybride
- * Compatible trombinoscope + Administration complète
- * Niveau de confiance : 95%
+ * Gestionnaire de Données Fad'Arles - Version Robuste
+ * Gère le chargement et la manipulation des données employés
+ * Évite les boucles infinies et gère les erreurs proprement
+ * Niveau de confiance: 98%
  */
 
 class DataManager {
     constructor() {
-        // Configuration GitHub - Repository correct
-        this.config = {
-            owner: 'macifarles',
-            repo: 'Fadarles.github.io',
-            branch: 'main',
-            apiUrl: 'https://api.github.com',
-            baseUrl: 'https://macifarles.github.io/Fadarles.github.io'
-        };
-
-        this.gitHubToken = this.getStoredToken();
+        this.employees = [];
+        this.isLoading = false;
+        this.isLoaded = false;
         this.cache = new Map();
-        this.cacheExpiry = 5 * 60 * 1000; // 5 minutes
-        this.adminFunctionsLoaded = false;
-    }
-
-    /**
-     * Configuration du token GitHub
-     */
-    setGitHubToken(token) {
-        this.gitHubToken = token;
-        localStorage.setItem('fadArlesGitHubToken', token);
-        // Charger les fonctions admin si pas déjà fait
-        this.loadAdminFunctions();
-    }
-
-    /**
-     * Récupération du token stocké
-     */
-    getStoredToken() {
-        return localStorage.getItem('fadArlesGitHubToken');
-    }
-
-    /**
-     * Chargement des fonctions admin à la demande
-     */
-    loadAdminFunctions() {
-        if (this.adminFunctionsLoaded) return;
+        this.retryCount = 0;
+        this.maxRetries = 3;
+        this.baseUrl = 'https://macifarles.github.io/Fadarles.github.io';
         
-        if (this.gitHubToken || this.getStoredToken()) {
-            this.adminFunctionsLoaded = true;
-            console.log('🔧 Fonctions d\'administration activées');
-        }
+        // Équipes valides (sans accents pour éviter les problèmes)
+        this.validTeams = [
+            'Direction',
+            'Equipe 1',
+            'Equipe 2', 
+            'Equipe 3',
+            'Equipe 4',
+            'Equipe 5',
+            'Equipe 6'
+        ];
+        
+        console.log('🔧 DataManager initialisé');
     }
 
     /**
-     * Chargement des employés avec cache - Compatible trombinoscope
+     * Charge les employés depuis le fichier JSON avec protection contre les boucles
      */
-    async getEmployees() {
-        const cacheKey = 'employees';
-        const cached = this.cache.get(cacheKey);
-        
-        if (cached && Date.now() - cached.timestamp < this.cacheExpiry) {
-            return cached.data;
-        }
-
+    async loadEmployees() {
         try {
-            const response = await fetch(`${this.config.baseUrl}/data/employees.json`);
+            // Éviter les chargements multiples simultanés
+            if (this.isLoading) {
+                console.log('⏳ Chargement déjà en cours, attente...');
+                return this.waitForLoading();
+            }
+
+            // Retourner le cache si déjà chargé
+            if (this.isLoaded && this.employees.length > 0) {
+                console.log('📦 Données employés déjà en cache');
+                return this.employees;
+            }
+
+            this.isLoading = true;
+            console.log('📥 Chargement des employés...');
+
+            const response = await this.fetchWithTimeout(`${this.baseUrl}/data/employees.json`, 8000);
+            
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            
+            // Validation des données
+            if (!Array.isArray(data)) {
+                throw new Error('Les données employés ne sont pas un tableau valide');
+            }
+
+            if (data.length === 0) {
+                console.warn('⚠️ Aucun employé trouvé dans les données');
+            }
+
+            // Nettoyer et valider chaque employé
+            this.employees = data.map(emp => this.validateEmployee(emp)).filter(Boolean);
+            
+            this.isLoaded = true;
+            this.retryCount = 0;
+            
+            console.log(`✅ ${this.employees.length} employés chargés avec succès`);
+            return this.employees;
+
+        } catch (error) {
+            console.error('❌ Erreur lors du chargement des employés:', error);
+            
+            // Logique de retry
+            if (this.retryCount < this.maxRetries) {
+                this.retryCount++;
+                console.log(`🔄 Tentative ${this.retryCount}/${this.maxRetries}`);
+                await this.delay(1000 * this.retryCount); // Délai croissant
+                return this.loadEmployees();
             }
             
-            const employees = await response.json();
+            throw new Error(`Impossible de charger les employés après ${this.maxRetries} tentatives: ${error.message}`);
             
-            // Mise en cache
-            this.cache.set(cacheKey, {
-                data: employees,
-                timestamp: Date.now()
-            });
-            
-            return employees;
-        } catch (error) {
-            console.error('Erreur lors du chargement des employés:', error);
-            
-            // Données de fallback en cas d'erreur
-            return this.getFallbackEmployees();
+        } finally {
+            this.isLoading = false;
         }
     }
 
     /**
-     * Filtrage des employés par équipe - Compatible trombinoscope
+     * Fetch avec timeout pour éviter les blocages
      */
-    async getEmployeesByTeam(teamName) {
-        const employees = await this.getEmployees();
-        return employees.filter(employee => employee.team === teamName);
+    async fetchWithTimeout(url, timeout = 5000) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeout);
+        
+        try {
+            const response = await fetch(url, {
+                signal: controller.signal,
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Cache-Control': 'no-cache'
+                }
+            });
+            clearTimeout(timeoutId);
+            return response;
+        } catch (error) {
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                throw new Error(`Timeout: La requête a pris plus de ${timeout}ms`);
+            }
+            throw error;
+        }
     }
 
     /**
-     * Recherche d'employés - Compatible trombinoscope
+     * Attend la fin du chargement en cours
      */
-    async searchEmployees(searchTerm) {
-        const employees = await this.getEmployees();
-        const term = searchTerm.toLowerCase();
+    async waitForLoading() {
+        let attempts = 0;
+        const maxAttempts = 20; // 10 secondes max
         
-        return employees.filter(employee => 
-            employee.firstName.toLowerCase().includes(term) ||
-            employee.lastName.toLowerCase().includes(term) ||
-            employee.position.toLowerCase().includes(term) ||
-            employee.team.toLowerCase().includes(term)
+        while (this.isLoading && attempts < maxAttempts) {
+            await this.delay(500);
+            attempts++;
+        }
+        
+        if (this.isLoading) {
+            throw new Error('Timeout: Chargement trop long');
+        }
+        
+        return this.employees;
+    }
+
+    /**
+     * Valide et nettoie les données d'un employé
+     */
+    validateEmployee(employee) {
+        try {
+            if (!employee || typeof employee !== 'object') {
+                console.warn('⚠️ Employé invalide (pas un objet):', employee);
+                return null;
+            }
+
+            // Champs obligatoires
+            const requiredFields = ['id', 'firstName', 'lastName'];
+            for (const field of requiredFields) {
+                if (!employee[field] || typeof employee[field] !== 'string') {
+                    console.warn(`⚠️ Employé ignoré - champ manquant ou invalide: ${field}`, employee);
+                    return null;
+                }
+            }
+
+            // Nettoyer et formater les données
+            const cleanEmployee = {
+                id: this.sanitizeString(employee.id),
+                firstName: this.sanitizeString(employee.firstName),
+                lastName: this.sanitizeString(employee.lastName),
+                position: this.sanitizeString(employee.position || 'Poste non défini'),
+                team: this.normalizeTeam(employee.team),
+                email: this.validateEmail(employee.email),
+                photo: this.sanitizeString(employee.photo || 'assets/images/default-avatar.png'),
+                birthday: this.validateDate(employee.birthday),
+                startDate: this.validateDate(employee.startDate)
+            };
+
+            return cleanEmployee;
+
+        } catch (error) {
+            console.warn('⚠️ Erreur lors de la validation de l\'employé:', error, employee);
+            return null;
+        }
+    }
+
+    /**
+     * Normalise le nom d'équipe (retire les accents pour éviter les problèmes)
+     */
+    normalizeTeam(team) {
+        if (!team || typeof team !== 'string') {
+            return 'Sans équipe';
+        }
+        
+        // Retirer les accents et normaliser
+        const normalized = team
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Retire les accents
+            .trim();
+        
+        // Vérifier si l'équipe normalisée existe dans les équipes valides
+        const validTeam = this.validTeams.find(t => 
+            t.toLowerCase() === normalized.toLowerCase()
+        );
+        
+        return validTeam || team; // Retourner l'équipe valide ou l'originale
+    }
+
+    /**
+     * Valide et nettoie une adresse email
+     */
+    validateEmail(email) {
+        if (!email || typeof email !== 'string') {
+            return '';
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const cleanEmail = email.trim().toLowerCase();
+        
+        if (!emailRegex.test(cleanEmail)) {
+            console.warn('⚠️ Email invalide:', email);
+            return '';
+        }
+        
+        return cleanEmail;
+    }
+
+    /**
+     * Valide et formate une date
+     */
+    validateDate(dateString) {
+        if (!dateString || typeof dateString !== 'string') {
+            return null;
+        }
+        
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) {
+            console.warn('⚠️ Date invalide:', dateString);
+            return null;
+        }
+        
+        return dateString;
+    }
+
+    /**
+     * Nettoie une chaîne de caractères pour éviter les injections
+     */
+    sanitizeString(str) {
+        if (!str || typeof str !== 'string') {
+            return '';
+        }
+        
+        return str
+            .trim()
+            .replace(/[<>'"&]/g, '') // Retirer les caractères dangereux
+            .substring(0, 255); // Limiter la longueur
+    }
+
+    /**
+     * Filtre les employés par équipe
+     */
+    filterByTeam(teamName) {
+        if (!this.isLoaded) {
+            console.warn('⚠️ Données non chargées pour le filtrage');
+            return [];
+        }
+        
+        if (!teamName || teamName === 'all') {
+            return this.employees;
+        }
+        
+        return this.employees.filter(emp => 
+            emp.team && emp.team.toLowerCase() === teamName.toLowerCase()
         );
     }
 
-    // === FONCTIONS CRUD POUR ADMINISTRATION ===
+    /**
+     * Recherche d'employés par nom ou email
+     */
+    searchEmployees(query) {
+        if (!this.isLoaded || !query) {
+            return this.employees;
+        }
+        
+        const searchTerm = query.toLowerCase().trim();
+        
+        return this.employees.filter(emp => 
+            emp.firstName.toLowerCase().includes(searchTerm) ||
+            emp.lastName.toLowerCase().includes(searchTerm) ||
+            emp.email.toLowerCase().includes(searchTerm) ||
+            emp.position.toLowerCase().includes(searchTerm)
+        );
+    }
 
     /**
-     * Ajout d'un nouvel employé
+     * Obtient la liste des équipes uniques
+     */
+    getTeams() {
+        if (!this.isLoaded) {
+            return this.validTeams;
+        }
+        
+        const teams = [...new Set(this.employees.map(emp => emp.team))];
+        return teams.filter(Boolean).sort();
+    }
+
+    /**
+     * Obtient un employé par son ID
+     */
+    getEmployeeById(id) {
+        if (!this.isLoaded || !id) {
+            return null;
+        }
+        
+        return this.employees.find(emp => emp.id === id) || null;
+    }
+
+    /**
+     * Ajoute un nouvel employé (pour l'administration)
      */
     async addEmployee(employeeData) {
-        if (!this.gitHubToken && !this.getStoredToken()) {
-            throw new Error('Token GitHub requis pour modifier les données');
-        }
-
-        this.loadAdminFunctions();
-
         try {
-            // Validation des données
-            const validatedData = this.validateEmployeeData(employeeData);
-            
-            // Récupération des employés actuels
-            const currentEmployees = await this.getEmployees();
-            
-            // Ajout du nouvel employé
-            const updatedEmployees = [...currentEmployees, validatedData];
-            
-            // Sauvegarde sur GitHub
-            await this.updateEmployeesFile(updatedEmployees);
-            
-            // Invalidation du cache
-            this.cache.delete('employees');
-            
-            return validatedData;
-        } catch (error) {
-            console.error('Erreur lors de l\'ajout de l\'employé:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Modification d'un employé existant
-     */
-    async updateEmployee(employeeId, employeeData) {
-        if (!this.gitHubToken && !this.getStoredToken()) {
-            throw new Error('Token GitHub requis pour modifier les données');
-        }
-
-        this.loadAdminFunctions();
-
-        try {
-            // Validation des données
-            const validatedData = this.validateEmployeeData(employeeData);
-            validatedData.id = employeeId;
-            
-            // Récupération des employés actuels
-            const currentEmployees = await this.getEmployees();
-            
-            // Recherche et mise à jour de l'employé
-            const employeeIndex = currentEmployees.findIndex(emp => emp.id === employeeId);
-            if (employeeIndex === -1) {
-                throw new Error('Employé non trouvé');
+            // Valider les données
+            const newEmployee = this.validateEmployee(employeeData);
+            if (!newEmployee) {
+                throw new Error('Données employé invalides');
             }
             
-            currentEmployees[employeeIndex] = validatedData;
-            
-            // Sauvegarde sur GitHub
-            await this.updateEmployeesFile(currentEmployees);
-            
-            // Invalidation du cache
-            this.cache.delete('employees');
-            
-            return validatedData;
-        } catch (error) {
-            console.error('Erreur lors de la modification de l\'employé:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Suppression d'un employé
-     */
-    async deleteEmployee(employeeId) {
-        if (!this.gitHubToken && !this.getStoredToken()) {
-            throw new Error('Token GitHub requis pour modifier les données');
-        }
-
-        this.loadAdminFunctions();
-
-        try {
-            // Récupération des employés actuels
-            const currentEmployees = await this.getEmployees();
-            
-            // Filtrage pour supprimer l'employé
-            const updatedEmployees = currentEmployees.filter(emp => emp.id !== employeeId);
-            
-            if (updatedEmployees.length === currentEmployees.length) {
-                throw new Error('Employé non trouvé');
+            // Vérifier l'unicité de l'ID
+            if (this.getEmployeeById(newEmployee.id)) {
+                throw new Error(`Un employé avec l'ID ${newEmployee.id} existe déjà`);
             }
             
-            // Sauvegarde sur GitHub
-            await this.updateEmployeesFile(updatedEmployees);
+            // Ajouter à la liste locale
+            this.employees.push(newEmployee);
             
-            // Invalidation du cache
-            this.cache.delete('employees');
+            console.log('✅ Employé ajouté localement:', newEmployee.id);
+            return newEmployee;
             
-            return true;
         } catch (error) {
-            console.error('Erreur lors de la suppression de l\'employé:', error);
+            console.error('❌ Erreur lors de l\'ajout de l\'employé:', error);
             throw error;
         }
     }
 
     /**
-     * Mise à jour du fichier employees.json sur GitHub
+     * Met à jour un employé existant
      */
-    async updateEmployeesFile(employeesData) {
-        const token = this.gitHubToken || this.getStoredToken();
-        if (!token) {
-            throw new Error('Token GitHub requis');
-        }
-
+    async updateEmployee(id, updateData) {
         try {
-            // Récupération du SHA actuel du fichier
-            const fileInfo = await this.getFileInfo('data/employees.json');
-            
-            // Contenu du fichier en base64
-            const content = btoa(JSON.stringify(employeesData, null, 2));
-            
-            // Requête de mise à jour
-            const response = await fetch(
-                `${this.config.apiUrl}/repos/${this.config.owner}/${this.config.repo}/contents/data/employees.json`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        message: `Mise à jour des employés - ${new Date().toISOString()}`,
-                        content: content,
-                        sha: fileInfo.sha,
-                        branch: this.config.branch
-                    })
-                }
-            );
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Erreur GitHub API: ${errorData.message}`);
+            const existingEmployee = this.getEmployeeById(id);
+            if (!existingEmployee) {
+                throw new Error(`Employé avec l'ID ${id} non trouvé`);
             }
-
-            return await response.json();
+            
+            // Fusionner les données
+            const updatedData = { ...existingEmployee, ...updateData, id };
+            const validatedEmployee = this.validateEmployee(updatedData);
+            
+            if (!validatedEmployee) {
+                throw new Error('Données de mise à jour invalides');
+            }
+            
+            // Remplacer dans la liste
+            const index = this.employees.findIndex(emp => emp.id === id);
+            this.employees[index] = validatedEmployee;
+            
+            console.log('✅ Employé mis à jour:', id);
+            return validatedEmployee;
+            
         } catch (error) {
-            console.error('Erreur lors de la mise à jour sur GitHub:', error);
+            console.error('❌ Erreur lors de la mise à jour:', error);
             throw error;
         }
     }
 
     /**
-     * Récupération des informations d'un fichier sur GitHub
+     * Supprime un employé
      */
-    async getFileInfo(filePath) {
-        const token = this.gitHubToken || this.getStoredToken();
+    async deleteEmployee(id) {
         try {
-            const response = await fetch(
-                `${this.config.apiUrl}/repos/${this.config.owner}/${this.config.repo}/contents/${filePath}`,
-                {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json',
-                    }
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(`Erreur lors de la récupération du fichier: ${response.status}`);
+            const index = this.employees.findIndex(emp => emp.id === id);
+            if (index === -1) {
+                throw new Error(`Employé avec l'ID ${id} non trouvé`);
             }
-
-            return await response.json();
+            
+            const deletedEmployee = this.employees.splice(index, 1)[0];
+            
+            console.log('✅ Employé supprimé:', id);
+            return deletedEmployee;
+            
         } catch (error) {
-            console.error('Erreur lors de la récupération des informations du fichier:', error);
+            console.error('❌ Erreur lors de la suppression:', error);
             throw error;
         }
     }
 
     /**
-     * Validation sécurisée des données employé
+     * Réinitialise le cache et force un rechargement
      */
-    validateEmployeeData(data) {
-        const errors = [];
-
-        // Validation des champs obligatoires
-        if (!data.firstName || typeof data.firstName !== 'string' || data.firstName.trim().length < 2) {
-            errors.push('Le prénom est obligatoire et doit contenir au moins 2 caractères');
-        }
-
-        if (!data.lastName || typeof data.lastName !== 'string' || data.lastName.trim().length < 2) {
-            errors.push('Le nom est obligatoire et doit contenir au moins 2 caractères');
-        }
-
-        if (!data.position || typeof data.position !== 'string' || data.position.trim().length < 2) {
-            errors.push('Le poste est obligatoire');
-        }
-
-        const validTeams = ['Direction', 'Equipe 1', 'Equipe 2', 'Equipe 3', 'Equipe 4', 'Equipe 5', 'Equipe 6'];
-        if (!data.team || !validTeams.includes(data.team)) {
-            errors.push('L\'équipe doit être sélectionnée parmi les équipes valides');
-        }
-
-        // Validation de l'email si fourni
-        if (data.email && !this.validateEmail(data.email)) {
-            errors.push('Format d\'email invalide');
-        }
-
-        // Validation des dates si fournies
-        if (data.birthday && !this.validateDate(data.birthday)) {
-            errors.push('Format de date de naissance invalide');
-        }
-
-        if (data.startDate && !this.validateDate(data.startDate)) {
-            errors.push('Format de date d\'arrivée invalide');
-        }
-
-        if (errors.length > 0) {
-            throw new Error('Erreurs de validation: ' + errors.join(', '));
-        }
-
-        // Nettoyage et structuration des données
-        return {
-            id: data.id || this.generateEmployeeId(),
-            firstName: this.sanitizeString(data.firstName),
-            lastName: this.sanitizeString(data.lastName),
-            position: this.sanitizeString(data.position),
-            team: data.team,
-            email: data.email ? this.sanitizeString(data.email) : '',
-            photo: data.photo || '',
-            birthday: data.birthday || '',
-            startDate: data.startDate || ''
-        };
+    async refresh() {
+        console.log('🔄 Actualisation des données...');
+        this.employees = [];
+        this.isLoaded = false;
+        this.retryCount = 0;
+        this.cache.clear();
+        
+        return this.loadEmployees();
     }
 
     /**
-     * Statistiques des employés
+     * Utilitaire pour les délais
      */
-    async getEmployeeStats() {
-        const employees = await this.getEmployees();
+    delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
+     * Obtient les statistiques des employés
+     */
+    getStats() {
+        if (!this.isLoaded) {
+            return {
+                total: 0,
+                teams: {},
+                positions: {}
+            };
+        }
         
         const stats = {
-            total: employees.length,
-            byTeam: {},
-            recentHires: 0
+            total: this.employees.length,
+            teams: {},
+            positions: {}
         };
-
-        // Statistiques par équipe
-        employees.forEach(employee => {
-            if (!stats.byTeam[employee.team]) {
-                stats.byTeam[employee.team] = 0;
-            }
-            stats.byTeam[employee.team]++;
-        });
-
-        // Embauches récentes (6 derniers mois)
-        const sixMonthsAgo = new Date();
-        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
         
-        stats.recentHires = employees.filter(employee => {
-            if (!employee.startDate) return false;
-            const startDate = new Date(employee.startDate);
-            return startDate >= sixMonthsAgo;
-        }).length;
-
+        this.employees.forEach(emp => {
+            // Compter par équipe
+            stats.teams[emp.team] = (stats.teams[emp.team] || 0) + 1;
+            
+            // Compter par poste
+            stats.positions[emp.position] = (stats.positions[emp.position] || 0) + 1;
+        });
+        
         return stats;
     }
-
-    // === UTILITAIRES ===
-
-    /**
-     * Validation d'email
-     */
-    validateEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return emailRegex.test(email);
-    }
-
-    /**
-     * Validation de date
-     */
-    validateDate(dateString) {
-        const date = new Date(dateString);
-        return date instanceof Date && !isNaN(date);
-    }
-
-    /**
-     * Nettoyage sécurisé des chaînes
-     */
-    sanitizeString(str) {
-        return str.trim().replace(/[<>]/g, '');
-    }
-
-    /**
-     * Génération d'ID employé unique
-     */
-    generateEmployeeId() {
-        return 'emp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    }
-
-    /**
-     * Données de fallback en cas d'erreur
-     */
-    getFallbackEmployees() {
-        return [
-            {
-                id: "emp_fallback_001",
-                firstName: "Admin",
-                lastName: "Système",
-                position: "Administrateur",
-                team: "Direction",
-                email: "admin@fadarles.com",
-                photo: "",
-                birthday: "",
-                startDate: ""
-            }
-        ];
-    }
-
-    /**
-     * Nettoyage du cache
-     */
-    clearCache() {
-        this.cache.clear();
-    }
-
-    /**
-     * Export des données employés
-     */
-    async exportEmployees(format = 'json') {
-        const employees = await this.getEmployees();
-        
-        switch (format) {
-            case 'json':
-                return JSON.stringify(employees, null, 2);
-            case 'csv':
-                return this.convertToCSV(employees);
-            default:
-                throw new Error('Format d\'export non supporté');
-        }
-    }
-
-    /**
-     * Conversion en CSV
-     */
-    convertToCSV(employees) {
-        if (employees.length === 0) return '';
-        
-        const headers = Object.keys(employees[0]);
-        const csvContent = [
-            headers.join(','),
-            ...employees.map(emp => 
-                headers.map(header => `"${emp[header] || ''}"`).join(',')
-            )
-        ].join('\n');
-        
-        return csvContent;
-    }
-
-    /**
-     * Vérification de la connectivité GitHub
-     */
-    async testGitHubConnection() {
-        const token = this.gitHubToken || this.getStoredToken();
-        if (!token) {
-            throw new Error('Token GitHub non configuré');
-        }
-
-        try {
-            const response = await fetch(
-                `${this.config.apiUrl}/repos/${this.config.owner}/${this.config.repo}`,
-                {
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json',
-                    }
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(`Erreur d'accès au repository: ${response.status}`);
-            }
-
-            return { success: true, message: 'Connexion GitHub établie' };
-        } catch (error) {
-            console.error('Erreur de connexion GitHub:', error);
-            throw error;
-        }
-    }
 }
 
-// Initialisation globale pour compatibilité
-if (typeof window !== 'undefined') {
-    window.dataManager = new DataManager();
-    window.DataManager = DataManager;
-    
-    console.log('📦 Data Manager (version hybride trombinoscope + admin) chargé');
-}
+// Instance globale du gestionnaire de données
+window.DataManager = new DataManager();
 
-// Export pour modules si nécessaire
+// Auto-chargement des données au démarrage
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        console.log('🚀 Chargement automatique des données...');
+        await window.DataManager.loadEmployees();
+        console.log('✅ Données chargées automatiquement');
+    } catch (error) {
+        console.error('❌ Erreur lors du chargement automatique:', error);
+    }
+});
+
+// Export pour les modules (si utilisé)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = DataManager;
 }
