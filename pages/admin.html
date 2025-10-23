@@ -3,207 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administration - Fad'Arles</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <link rel="stylesheet" href="../css/admin.css">
+    <title>Test Admin - Fad'Arles</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #ff6b35;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #e55a2d;
+        }
+        .debug-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+            padding: 10px;
+            background: #ffebee;
+            border-radius: 5px;
+        }
+        .success {
+            color: green;
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f5e8;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <!-- Header principal -->
-    <header class="main-header">
-        <nav>
-            <div class="nav-container">
-                <div class="logo">
-                    <h1>Fad'Arles - Administration</h1>
-                </div>
-                <ul class="nav-menu">
-                    <li><a href="../index.html">Accueil</a></li>
-                    <li><a href="../pages/trombinoscope.html">Trombinoscope</a></li>
-                    <li><a href="#" id="logout-btn" style="display: none;">Déconnexion</a></li>
-                </ul>
+    <div class="test-form">
+        <h2>🔧 Test Connexion Admin</h2>
+        <p>Page de diagnostic pour tester la connexion d'administration</p>
+        
+        <form id="test-form">
+            <div class="form-group">
+                <label for="test-email">Email :</label>
+                <input type="email" id="test-email" value="admin@fadarles.com" required>
             </div>
-        </nav>
-    </header>
-
-    <main class="admin-container">
-        <!-- Section d'authentification -->
-        <section id="auth-section" class="auth-section">
-            <div class="auth-card">
-                <h2>Connexion Administration</h2>
-                <form id="auth-form">
-                    <div class="form-group">
-                        <label for="admin-email">Email administrateur :</label>
-                        <input type="email" id="admin-email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="admin-password">Mot de passe :</label>
-                        <input type="password" id="admin-password" required>
-                    </div>
-                    <button type="submit" class="btn-primary">Se connecter</button>
-                </form>
-                <div id="auth-error" class="error-message" style="display: none;"></div>
+            
+            <div class="form-group">
+                <label for="test-password">Mot de passe :</label>
+                <input type="password" id="test-password" value="FadArles2024!" required>
             </div>
-        </section>
-
-        <!-- Tableau de bord admin -->
-        <section id="dashboard-section" class="dashboard-section" style="display: none;">
-            <div class="dashboard-header">
-                <h2>Tableau de Bord</h2>
-                <div class="stats-cards">
-                    <div class="stat-card">
-                        <h3 id="total-employees">0</h3>
-                        <p>Employés Total</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3 id="total-teams">7</h3>
-                        <p>Équipes (+ Direction)</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation des sections admin -->
-            <div class="admin-nav">
-                <button class="admin-nav-btn active" data-section="employees">Gestion Employés</button>
-                <button class="admin-nav-btn" data-section="teams">Gestion Équipes</button>
-                <button class="admin-nav-btn" data-section="settings">Paramètres</button>
-            </div>
-
-            <!-- Section Gestion Employés -->
-            <div id="employees-section" class="admin-section active">
-                <div class="section-header">
-                    <h3>Gestion des Employés</h3>
-                    <button id="add-employee-btn" class="btn-primary">Ajouter un Employé</button>
-                </div>
-
-                <!-- Filtres et recherche -->
-                <div class="filters-section">
-                    <div class="search-group">
-                        <input type="text" id="search-employee" placeholder="Rechercher un employé...">
-                    </div>
-                    <div class="filter-group">
-                        <select id="filter-team">
-                            <option value="">Toutes les équipes</option>
-                            <option value="Direction">Direction</option>
-                            <option value="Equipe 1">Équipe 1</option>
-                            <option value="Equipe 2">Équipe 2</option>
-                            <option value="Equipe 3">Équipe 3</option>
-                            <option value="Equipe 4">Équipe 4</option>
-                            <option value="Equipe 5">Équipe 5</option>
-                            <option value="Equipe 6">Équipe 6</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Liste des employés -->
-                <div class="employees-list" id="employees-list">
-                    <!-- Les employés seront chargés dynamiquement -->
-                </div>
-            </div>
-
-            <!-- Section Gestion Équipes -->
-            <div id="teams-section" class="admin-section">
-                <div class="section-header">
-                    <h3>Gestion des Équipes</h3>
-                </div>
-                <div class="teams-grid" id="teams-grid">
-                    <!-- Les équipes seront chargées dynamiquement -->
-                </div>
-            </div>
-
-            <!-- Section Paramètres -->
-            <div id="settings-section" class="admin-section">
-                <div class="section-header">
-                    <h3>Paramètres Système</h3>
-                </div>
-                <div class="settings-content">
-                    <div class="settings-group">
-                        <h4>Configuration GitHub</h4>
-                        <div class="form-group">
-                            <label for="github-token">Token GitHub :</label>
-                            <input type="password" id="github-token" placeholder="Saisir votre token GitHub">
-                            <small>Nécessaire pour modifier les données du site</small>
-                        </div>
-                        <button id="save-github-settings" class="btn-secondary">Sauvegarder</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Modal pour ajouter/modifier un employé -->
-        <div id="employee-modal" class="modal" style="display: none;">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modal-title">Ajouter un Employé</h3>
-                    <span class="close" id="close-modal">&times;</span>
-                </div>
-                <form id="employee-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="employee-firstname">Prénom *</label>
-                            <input type="text" id="employee-firstname" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="employee-lastname">Nom *</label>
-                            <input type="text" id="employee-lastname" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="employee-position">Poste *</label>
-                        <input type="text" id="employee-position" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="employee-team">Équipe *</label>
-                        <select id="employee-team" required>
-                            <option value="">Sélectionner une équipe</option>
-                            <option value="Direction">Direction</option>
-                            <option value="Equipe 1">Équipe 1</option>
-                            <option value="Equipe 2">Équipe 2</option>
-                            <option value="Equipe 3">Équipe 3</option>
-                            <option value="Equipe 4">Équipe 4</option>
-                            <option value="Equipe 5">Équipe 5</option>
-                            <option value="Equipe 6">Équipe 6</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="employee-email">Email</label>
-                        <input type="email" id="employee-email">
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="employee-birthday">Date de naissance</label>
-                            <input type="date" id="employee-birthday">
-                        </div>
-                        <div class="form-group">
-                            <label for="employee-startdate">Date d'arrivée</label>
-                            <input type="date" id="employee-startdate">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="employee-photo">Photo</label>
-                        <input type="file" id="employee-photo" accept="image/*">
-                        <div id="photo-preview" class="photo-preview"></div>
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button type="button" id="cancel-employee" class="btn-secondary">Annuler</button>
-                        <button type="submit" class="btn-primary">Sauvegarder</button>
-                    </div>
-                </form>
-            </div>
+            
+            <button type="submit">🔐 Tester la Connexion</button>
+        </form>
+        
+        <div id="test-result"></div>
+        
+        <div class="debug-info">
+            <strong>📋 Informations de Diagnostic :</strong><br>
+            <div id="debug-log">Chargement...</div>
         </div>
-    </main>
-
-    <!-- Messages de notification -->
-    <div id="notification" class="notification" style="display: none;">
-        <span id="notification-message"></span>
-        <span class="notification-close">&times;</span>
+        
+        <div style="margin-top: 20px;">
+            <button onclick="location.href='admin.html'" style="background: #007bff;">
+                🚀 Aller vers l'Admin Réel
+            </button>
+        </div>
     </div>
 
-    <script src="../js/data-manager-admin.js"></script>
-    <script src="../js/admin.js"></script>
+    <script>
+        // Configuration de test (identique à l'admin réel)
+        const testConfig = {
+            adminEmails: [
+                'admin@fadarles.com',
+                'direction@fadarles.com',
+                'rh@fadarles.com'
+            ],
+            adminPassword: 'FadArles2024!'
+        };
+
+        // Logs de diagnostic
+        function addDebugLog(message) {
+            const debugLog = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.innerHTML += `<br>[${timestamp}] ${message}`;
+        }
+
+        // Validation email
+        function validateEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        // Affichage des résultats
+        function showResult(message, isSuccess) {
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.innerHTML = `<div class="${isSuccess ? 'success' : 'error'}">${message}</div>`;
+        }
+
+        // Test de connexion
+        function testLogin(email, password) {
+            addDebugLog(`🔍 Test avec email: ${email}`);
+            addDebugLog(`🔍 Longueur mot de passe: ${password.length}`);
+            
+            // Validation email
+            if (!validateEmail(email)) {
+                addDebugLog('❌ Format email invalide');
+                showResult('❌ Format d\'email invalide', false);
+                return false;
+            }
+            
+            // Validation mot de passe
+            if (password.length < 8) {
+                addDebugLog('❌ Mot de passe trop court');
+                showResult('❌ Mot de passe trop court (min 8 caractères)', false);
+                return false;
+            }
+            
+            // Test des identifiants
+            const emailMatch = testConfig.adminEmails.includes(email);
+            const passwordMatch = password === testConfig.adminPassword;
+            
+            addDebugLog(`✓ Email dans la liste: ${emailMatch}`);
+            addDebugLog(`✓ Mot de passe correct: ${passwordMatch}`);
+            
+            if (emailMatch && passwordMatch) {
+                addDebugLog('✅ CONNEXION RÉUSSIE !');
+                showResult('✅ Connexion réussie ! Les identifiants sont corrects.', true);
+                return true;
+            } else {
+                addDebugLog('❌ Identifiants incorrects');
+                showResult('❌ Email ou mot de passe incorrect', false);
+                
+                if (!emailMatch) {
+                    addDebugLog(`💡 Emails autorisés: ${testConfig.adminEmails.join(', ')}`);
+                }
+                return false;
+            }
+        }
+
+        // Initialisation des logs de diagnostic
+        document.addEventListener('DOMContentLoaded', function() {
+            addDebugLog('🚀 Page de test chargée');
+            addDebugLog(`📧 Emails configurés: ${testConfig.adminEmails.length}`);
+            addDebugLog(`🔒 Mot de passe configuré: ${testConfig.adminPassword ? 'OUI' : 'NON'}`);
+            addDebugLog('🎯 Prêt pour les tests');
+            
+            // Gestionnaire d'événement pour le formulaire
+            document.getElementById('test-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addDebugLog('📝 Formulaire soumis');
+                
+                const email = document.getElementById('test-email').value.trim();
+                const password = document.getElementById('test-password').value;
+                
+                testLogin(email, password);
+            });
+            
+            // Test automatique au chargement
+            setTimeout(() => {
+                addDebugLog('🔄 Test automatique...');
+                testLogin('admin@fadarles.com', 'FadArles2024!');
+            }, 1000);
+        });
+
+        // Test de la console
+        console.log('🔧 Page de test admin chargée');
+        console.log('📊 Configuration:', testConfig);
+    </script>
 </body>
 </html>
