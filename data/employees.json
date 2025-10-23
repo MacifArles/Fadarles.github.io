@@ -12,21 +12,21 @@
   },
   {
     "id": "mgr_001",
-    "firstName": "Marie",
-    "lastName": "Martin",
+    "firstName": "Khady",
+    "lastName": "Fane",
     "position": "Manager d'Équipe",
-    "team": "Équipe 1",
-    "email": "marie.martin@macif.fr",
-    "photo": "assets/images/marie-martin.jpg",
+    "team": "K-Team",
+    "email": "Kfane@macif.fr",
+    "photo": "assets/images/khady-fane.jpg",
     "birthday": "1980-08-22",
     "startDate": "2015-03-01"
   },
   {
     "id": "cc_001",
-    "firstName": "Pierre",
-    "lastName": "Durand",
-    "position": "Conseiller Clientèle",
-    "team": "Équipe 1",
+    "firstName": "Kelly",
+    "lastName": "Le bouhris",
+    "position": "Conseillère Clientèle",
+    "team": "K-team",
     "email": "pierre.durand@macif.fr",
     "photo": "assets/images/pierre-durand.jpg",
     "birthday": "1985-12-10",
@@ -43,6 +43,19 @@
     "birthday": "1990-03-20",
     "startDate": "2020-01-10"
   },
+  
+  {
+    "id": "com_001",
+    "firstName": "Sophie",
+    "lastName": "Bernard",
+    "position": "Conseiller Commercial",
+    "team": "Équipe 1",
+    "email": "sophie.bernard@macif.fr",
+    "photo": "assets/images/sophie-bernard.jpg",
+    "birthday": "1990-03-20",
+    "startDate": "2020-01-10"
+  },
+  
   {
     "id": "mgr_002",
     "firstName": "Luc",
