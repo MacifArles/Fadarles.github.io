@@ -524,6 +524,10 @@
             console.log(`🔍 Filtrage avec: recherche="${searchTerm}", équipe="${teamFilter}"`);
             console.log(`📊 ${employees.length} employés au total`);
             
+            // Debug des équipes disponibles
+            const availableTeams = [...new Set(employees.map(emp => emp.team))];
+            console.log(`🏢 Équipes disponibles dans les données:`, availableTeams);
+            
             let filtered = [...employees];
 
             // Filtrage par terme de recherche
@@ -544,17 +548,41 @@
                 console.log(`🔍 Après recherche: ${filtered.length} employés`);
             }
 
-            // Filtrage par équipe
+            // Filtrage par équipe avec vérification
             if (teamFilter) {
+                console.log(`🏢 Recherche des employés de l'équipe: "${teamFilter}"`);
+                
+                filtered.forEach(emp => {
+                    console.log(`   - ${emp.firstName} ${emp.lastName}: équipe="${emp.team}"`);
+                });
+                
+                const beforeFilter = filtered.length;
                 filtered = filtered.filter(emp => {
+                    // Comparaison stricte
                     const match = emp.team === teamFilter;
-                    console.log(`👥 ${emp.firstName} ${emp.lastName}: équipe="${emp.team}", filtre="${teamFilter}", match=${match}`);
+                    if (!match) {
+                        console.log(`❌ ${emp.firstName} ${emp.lastName}: "${emp.team}" !== "${teamFilter}"`);
+                    } else {
+                        console.log(`✅ ${emp.firstName} ${emp.lastName}: "${emp.team}" === "${teamFilter}"`);
+                    }
                     return match;
                 });
-                console.log(`🏢 Après filtre équipe: ${filtered.length} employés`);
+                
+                console.log(`🏢 Filtrage équipe "${teamFilter}": ${beforeFilter} → ${filtered.length} employés`);
+                
+                if (filtered.length === 0 && beforeFilter > 0) {
+                    console.warn(`⚠️ Aucun employé trouvé pour l'équipe "${teamFilter}"`);
+                    console.warn(`💡 Équipes disponibles:`, availableTeams);
+                }
             }
 
             console.log(`✅ Résultat final: ${filtered.length} employés`);
+            
+            // Debug des employés filtrés
+            if (filtered.length > 0) {
+                console.log(`📋 Employés retenus:`, filtered.map(emp => `${emp.firstName} ${emp.lastName} (${emp.team})`));
+            }
+            
             renderEmployeesList(filtered);
             
             // Mise à jour de l'interface
