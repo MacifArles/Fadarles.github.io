@@ -221,51 +221,9 @@ class TrombinoscopeManager {
         console.log('Équipes à afficher:', teams);
         return teams;
     }
-     /**
- * Crée l'élément HTML d'une équipe avec logo
- * @param {Object} team - Données de l'équipe
- * @returns {HTMLElement} - Élément DOM de l'équipe
- */
-createTeamSection(team) {
-    const section = document.createElement('div');
-    section.className = 'team-section';
-    section.style.setProperty('--team-color', team.color);
-    
-    // Génération du chemin du logo basé sur le numéro d'équipe
-    const teamNumber = team.key.replace('equipe', '');
-    const logoPath = `assets/images/equipe-${teamNumber}.png`;
-    
-    const conseillerClientele = team.employees.filter(emp => 
-        emp.position.toLowerCase().includes('conseiller clientèle')
-    );
-    const commerciaux = team.employees.filter(emp => 
-        emp.position.toLowerCase().includes('conseiller commercial')
-    );
-    
-    const totalCommerciaux = conseillerClientele.length + commerciaux.length;
-    
-    section.innerHTML = `
-        <div class="team-header">
-            <img src="${logoPath}" alt="Logo ${team.name}" class="team-logo" 
-                 onerror="this.style.display='none';">
-            <div class="team-info">
-                <h3 class="team-name">${team.name}</h3>
-                <div class="team-stats">
-                    ${team.employees.length} membre(s) - ${totalCommerciaux} commercial(aux)
-                </div>
-            </div>
-        </div>
-        <div class="employees-grid team-employees-grid">
-            ${team.employees.map(employee => 
-                this.createEmployeeCard(employee, this.getEmployeeType(employee))
-            ).join('')}
-        </div>
-    `;
-    
-    return section;
-}
+
     /**
-     * Crée l'élément HTML d'une équipe avec comptage corrigé
+     * Crée l'élément HTML d'une équipe avec logo
      * @param {Object} team - Données de l'équipe
      * @returns {HTMLElement} - Élément DOM de l'équipe
      */
@@ -274,11 +232,10 @@ createTeamSection(team) {
         section.className = 'team-section';
         section.style.setProperty('--team-color', team.color);
         
-        const manager = team.employees.find(emp => 
-            emp.position.toLowerCase().includes('manager')
-        );
+        // Génération du chemin du logo basé sur le numéro d'équipe
+        const teamNumber = team.key.replace('equipe', '');
+        const logoPath = `assets/images/equipe-${teamNumber}.png`;
         
-        // Comptage corrigé : conseillers clientèle + commerciaux = total commerciaux
         const conseillerClientele = team.employees.filter(emp => 
             emp.position.toLowerCase().includes('conseiller clientèle')
         );
@@ -290,9 +247,13 @@ createTeamSection(team) {
         
         section.innerHTML = `
             <div class="team-header">
-                <h3 class="team-name">${team.name}</h3>
-                <div class="team-stats">
-                    ${team.employees.length} membre(s) - ${totalCommerciaux} commercial(aux)
+                <img src="${logoPath}" alt="Logo ${team.name}" class="team-logo" 
+                     onerror="this.style.display='none';">
+                <div class="team-info">
+                    <h3 class="team-name">${team.name}</h3>
+                    <div class="team-stats">
+                        ${team.employees.length} membre(s) - ${totalCommerciaux} commercial(aux)
+                    </div>
                 </div>
             </div>
             <div class="employees-grid team-employees-grid">
