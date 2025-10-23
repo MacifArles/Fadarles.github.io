@@ -1,322 +1,370 @@
 /**
- * Gestionnaire du trombinoscope - Version corrigée
- * Évite les boucles infinies et gère les erreurs proprement
- * Niveau de confiance: 95%
+ * Gestionnaire du trombinoscope avec filtrage par équipe
+ * Charge et affiche les employés selon la hiérarchie organisationnelle
+ * Version originale fonctionnelle
  */
 
 class TrombinoscopeManager {
     constructor() {
-        this.isLoading = false;
         this.employees = [];
-        this.selectedTeam = 'all';
-        this.retryCount = 0;
-        this.maxRetries = 3;
+        this.filteredEmployees = [];
+        this.currentFilter = 'all';
+        
+        // Configuration des couleurs d'équipe
+        this.teamColors = {
+            'equipe1': '#ff6b35',
+            'equipe2': '#f7931e', 
+            'equipe3': '#ffb627',
+            'equipe4': '#e74c3c',
+            'equipe5': '#9b59b6',
+            'equipe6': '#3498db'
+        };
+        
+        this.init();
     }
 
     /**
-     * Initialise le trombinoscope de manière sécurisée
+     * Initialise le trombinoscope
      */
     async init() {
         try {
-            console.log('🔄 Initialisation du trombinoscope...');
-            
-            // Éviter les initialisations multiples
-            if (this.isLoading) {
-                console.warn('⚠️ Initialisation déjà en cours');
-                return;
-            }
-
-            this.isLoading = true;
             await this.loadEmployees();
             this.setupEventListeners();
-            this.displayEmployees();
-            
-            console.log('✅ Trombinoscope initialisé avec succès');
-            
+            this.renderTrombinoscope();
+            this.hideLoading();
         } catch (error) {
-            console.error('❌ Erreur lors de l\'initialisation:', error);
-            this.showError('Erreur lors du chargement du trombinoscope');
-        } finally {
-            this.isLoading = false;
+            console.error('Erreur lors de l\'initialisation du trombinoscope:', error);
+            this.showError();
         }
     }
 
     /**
-     * Charge les employés avec gestion d'erreur et retry
+     * Charge les données des employés depuis le fichier JSON
      */
     async loadEmployees() {
         try {
-            console.log('📥 Chargement des employés...');
-            
-            // Vérifier si DataManager est disponible
-            if (typeof window.DataManager === 'undefined') {
-                throw new Error('DataManager non disponible');
-            }
-
-            // Charger les données avec timeout
-            const timeoutPromise = new Promise((_, reject) => {
-                setTimeout(() => reject(new Error('Timeout du chargement')), 10000);
-            });
-
-            const loadPromise = window.DataManager.loadEmployees();
-            
-            this.employees = await Promise.race([loadPromise, timeoutPromise]);
-            
-            if (!Array.isArray(this.employees) || this.employees.length === 0) {
-                throw new Error('Aucun employé trouvé');
-            }
-
-            console.log(`✅ ${this.employees.length} employés chargés`);
-            
+            this.employees = await dataManager.getData('employees.json');
+            this.filteredEmployees = [...this.employees];
+            console.log('Employés chargés:', this.employees);
         } catch (error) {
-            console.error('❌ Erreur chargement employés:', error);
-            
-            // Retry logique
-            if (this.retryCount < this.maxRetries) {
-                this.retryCount++;
-                console.log(`🔄 Tentative ${this.retryCount}/${this.maxRetries}`);
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                return this.loadEmployees();
-            }
-            
+            console.error('Erreur de chargement des employés:', error);
             throw error;
         }
     }
 
     /**
-     * Configure les événements utilisateur
+     * Configure les événements de filtrage
      */
     setupEventListeners() {
-        // Filtre par équipe
-        const teamFilter = document.getElementById('team-filter');
-        if (teamFilter) {
-            teamFilter.addEventListener('change', (e) => {
-                this.selectedTeam = e.target.value;
-                this.displayEmployees();
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const team = e.target.dataset.team;
+                console.log('Filtre sélectionné:', team);
+                this.filterByTeam(team);
+                this.updateActiveFilter(e.target);
             });
-        }
-
-        // Bouton rafraîchir
-        const refreshBtn = document.getElementById('refresh-btn');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => this.refresh());
-        }
+        });
     }
 
     /**
-     * Affiche les employés avec protection contre les boucles
+     * Filtre les employés par équipe
      */
-    displayEmployees() {
-        try {
-            const container = document.getElementById('employees-container');
-            if (!container) {
-                throw new Error('Container employés non trouvé');
-            }
-
-            console.log('🎨 Affichage des employés...');
-
-            // Nettoyer le container
-            container.innerHTML = '';
-
-            // Filtrer les employés
-            const filteredEmployees = this.filterEmployees();
-            
-            if (filteredEmployees.length === 0) {
-                container.innerHTML = `
-                    <div class="no-employees">
-                        <p>Aucun employé trouvé pour cette équipe.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Grouper par équipe
-            const groupedEmployees = this.groupByTeam(filteredEmployees);
-            
-            // Afficher chaque équipe
-            Object.keys(groupedEmployees).forEach(team => {
-                const teamSection = this.createTeamSection(team, groupedEmployees[team]);
-                container.appendChild(teamSection);
-            });
-
-            console.log(`✅ ${filteredEmployees.length} employés affichés`);
-
-        } catch (error) {
-            console.error('❌ Erreur affichage:', error);
-            this.showError('Erreur lors de l\'affichage des employés');
-        }
-    }
-
-    /**
-     * Filtre les employés selon l'équipe sélectionnée
-     */
-    filterEmployees() {
-        if (this.selectedTeam === 'all') {
-            return this.employees;
+    filterByTeam(teamFilter) {
+        this.currentFilter = teamFilter;
+        console.log('Application du filtre:', teamFilter);
+        
+        if (teamFilter === 'all') {
+            this.filteredEmployees = [...this.employees];
+        } else if (teamFilter === 'direction') {
+            // Direction inclut responsable + tous les managers
+            this.filteredEmployees = this.employees.filter(employee => 
+                employee.position.toLowerCase().includes('responsable') ||
+                employee.position.toLowerCase().includes('manager')
+            );
+        } else {
+            // Filtrage par équipe spécifique
+            const teamNumber = teamFilter.replace('equipe', '');
+            this.filteredEmployees = this.employees.filter(employee => 
+                employee.team.toLowerCase().includes(teamNumber) ||
+                employee.team.toLowerCase() === `équipe ${teamNumber}`
+            );
         }
         
-        return this.employees.filter(emp => 
-            emp.team && emp.team.toLowerCase() === this.selectedTeam.toLowerCase()
+        console.log('Employés filtrés:', this.filteredEmployees);
+        this.renderTrombinoscope();
+    }
+
+    /**
+     * Met à jour le bouton de filtre actif
+     */
+    updateActiveFilter(activeButton) {
+        // Retirer la classe active de tous les boutons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Ajouter la classe active au bouton cliqué
+        activeButton.classList.add('active');
+    }
+
+    /**
+     * Affiche la hiérarchie complète
+     */
+    renderTrombinoscope() {
+        const container = document.getElementById('trombinoscope-container');
+        if (!container) {
+            console.error('Container du trombinoscope introuvable');
+            return;
+        }
+
+        container.innerHTML = '';
+
+        if (this.currentFilter === 'all') {
+            this.renderHierarchy(container);
+        } else if (this.currentFilter === 'direction') {
+            this.renderDirection(container);
+        } else {
+            this.renderTeamEmployees(container);
+        }
+    }
+
+    /**
+     * Affiche la hiérarchie complète (Direction + Équipes)
+     */
+    renderHierarchy(container) {
+        // Section Direction
+        const directionSection = this.createSection('Direction', 'hierarchy-section');
+        const responsable = this.employees.find(emp => 
+            emp.position.toLowerCase().includes('responsable')
         );
-    }
-
-    /**
-     * Groupe les employés par équipe
-     */
-    groupByTeam(employees) {
-        const groups = {};
         
-        employees.forEach(emp => {
-            const team = emp.team || 'Sans équipe';
-            if (!groups[team]) {
-                groups[team] = [];
+        if (responsable) {
+            const responsableCard = this.createEmployeeCard(responsable);
+            responsableCard.classList.add('responsable');
+            directionSection.appendChild(responsableCard);
+        }
+
+        container.appendChild(directionSection);
+
+        // Section Équipes Commerciales
+        const teamsSection = this.createSection('Équipes Commerciales', 'hierarchy-section');
+        const teamsContainer = document.createElement('div');
+        teamsContainer.className = 'teams-container';
+
+        for (let i = 1; i <= 6; i++) {
+            const teamEmployees = this.employees.filter(emp => 
+                emp.team.toLowerCase().includes(i.toString()) ||
+                emp.team.toLowerCase() === `équipe ${i}`
+            );
+            
+            if (teamEmployees.length > 0) {
+                const teamCard = this.createTeamCard(i, teamEmployees);
+                teamsContainer.appendChild(teamCard);
             }
-            groups[team].push(emp);
-        });
-        
-        return groups;
+        }
+
+        teamsSection.appendChild(teamsContainer);
+        container.appendChild(teamsSection);
     }
 
     /**
-     * Crée une section d'équipe avec ses employés
+     * Affiche seulement la direction avec managers
      */
-    createTeamSection(teamName, employees) {
-        const section = document.createElement('div');
-        section.className = 'team-section';
-        
-        // Titre de l'équipe
-        const title = document.createElement('h3');
-        title.className = 'team-title';
-        title.textContent = `${teamName} (${employees.length} membre${employees.length > 1 ? 's' : ''})`;
-        
-        // Container des cartes employés
-        const cardsContainer = document.createElement('div');
-        cardsContainer.className = 'employees-grid';
-        
-        // Créer les cartes employés
-        employees.forEach(employee => {
+    renderDirection(container) {
+        const section = this.createSection('Direction & Management', 'hierarchy-section');
+        const grid = document.createElement('div');
+        grid.className = 'direction-grid';
+
+        this.filteredEmployees.forEach(employee => {
             const card = this.createEmployeeCard(employee);
-            cardsContainer.appendChild(card);
+            if (employee.position.toLowerCase().includes('responsable')) {
+                card.classList.add('responsable');
+            }
+            grid.appendChild(card);
         });
+
+        section.appendChild(grid);
+        container.appendChild(section);
+    }
+
+    /**
+     * Affiche les employés d'une équipe spécifique
+     */
+    renderTeamEmployees(container) {
+        const teamNumber = this.currentFilter.replace('equipe', '');
+        const section = this.createSection(`Équipe ${teamNumber}`, 'hierarchy-section');
+        const grid = document.createElement('div');
+        grid.className = 'team-employees-grid';
+
+        this.filteredEmployees.forEach(employee => {
+            const card = this.createEmployeeCard(employee);
+            grid.appendChild(card);
+        });
+
+        section.appendChild(grid);
+        container.appendChild(section);
+    }
+
+    /**
+     * Crée une section avec titre
+     */
+    createSection(title, className) {
+        const section = document.createElement('div');
+        section.className = className;
         
-        section.appendChild(title);
-        section.appendChild(cardsContainer);
+        const titleElement = document.createElement('h2');
+        titleElement.className = 'section-title';
+        titleElement.textContent = title;
         
+        section.appendChild(titleElement);
         return section;
     }
 
     /**
-     * Crée une carte employé sécurisée
+     * Crée une carte d'équipe avec ses employés
+     */
+    createTeamCard(teamNumber, employees) {
+        const teamCard = document.createElement('div');
+        teamCard.className = 'team-card';
+        
+        // Couleur de l'équipe
+        const color = this.teamColors[`equipe${teamNumber}`] || '#6c5ce7';
+        teamCard.style.borderColor = color;
+
+        // En-tête de l'équipe avec logo
+        const teamHeader = document.createElement('div');
+        teamHeader.className = 'team-header';
+        teamHeader.style.background = `linear-gradient(135deg, ${color}, ${color}dd)`;
+        
+        const teamLogo = document.createElement('img');
+        teamLogo.src = `assets/images/equipe-${teamNumber}.png`;
+        teamLogo.alt = `Logo Équipe ${teamNumber}`;
+        teamLogo.className = 'team-logo';
+        teamLogo.onerror = () => teamLogo.style.display = 'none';
+        
+        const teamTitle = document.createElement('h3');
+        teamTitle.textContent = `Équipe ${teamNumber}`;
+        teamTitle.className = 'team-title';
+        
+        teamHeader.appendChild(teamLogo);
+        teamHeader.appendChild(teamTitle);
+
+        // Employés de l'équipe
+        const employeesContainer = document.createElement('div');
+        employeesContainer.className = 'team-employees';
+
+        employees.forEach(employee => {
+            const miniCard = this.createMiniEmployeeCard(employee);
+            employeesContainer.appendChild(miniCard);
+        });
+
+        teamCard.appendChild(teamHeader);
+        teamCard.appendChild(employeesContainer);
+
+        return teamCard;
+    }
+
+    /**
+     * Crée une carte d'employé complète
      */
     createEmployeeCard(employee) {
         const card = document.createElement('div');
         card.className = 'employee-card';
-        card.setAttribute('data-id', employee.id || '');
+
+        const photo = document.createElement('div');
+        photo.className = 'employee-photo';
         
-        // Échapper les données pour éviter XSS
-        const safeEmployee = {
-            firstName: this.escapeHtml(employee.firstName || ''),
-            lastName: this.escapeHtml(employee.lastName || ''),
-            position: this.escapeHtml(employee.position || ''),
-            email: this.escapeHtml(employee.email || ''),
-            photo: employee.photo || 'assets/images/default-avatar.png'
-        };
+        const img = document.createElement('img');
+        img.src = employee.photo || 'assets/images/default-avatar.png';
+        img.alt = `${employee.firstName} ${employee.lastName}`;
+        img.onerror = () => img.src = 'assets/images/default-avatar.png';
         
-        card.innerHTML = `
-            <div class="employee-photo">
-                <img src="${safeEmployee.photo}" 
-                     alt="${safeEmployee.firstName} ${safeEmployee.lastName}"
-                     onerror="this.src='assets/images/default-avatar.png'">
-            </div>
-            <div class="employee-info">
-                <h4 class="employee-name">${safeEmployee.firstName} ${safeEmployee.lastName}</h4>
-                <p class="employee-position">${safeEmployee.position}</p>
-                <a href="mailto:${safeEmployee.email}" class="employee-email">
-                    ${safeEmployee.email}
-                </a>
-            </div>
-        `;
+        photo.appendChild(img);
+
+        const info = document.createElement('div');
+        info.className = 'employee-info';
         
+        const name = document.createElement('h4');
+        name.className = 'employee-name';
+        name.textContent = `${employee.firstName} ${employee.lastName}`;
+        
+        const position = document.createElement('p');
+        position.className = 'employee-position';
+        position.textContent = employee.position;
+        
+        const email = document.createElement('a');
+        email.className = 'employee-email';
+        email.href = `mailto:${employee.email}`;
+        email.textContent = employee.email;
+
+        info.appendChild(name);
+        info.appendChild(position);
+        info.appendChild(email);
+
+        card.appendChild(photo);
+        card.appendChild(info);
+
         return card;
     }
 
     /**
-     * Sécurité : Échapper le HTML pour éviter les injections XSS
+     * Crée une mini-carte d'employé pour les équipes
      */
-    escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+    createMiniEmployeeCard(employee) {
+        const card = document.createElement('div');
+        card.className = 'mini-employee-card';
+
+        const photo = document.createElement('div');
+        photo.className = 'mini-employee-photo';
+        
+        const img = document.createElement('img');
+        img.src = employee.photo || 'assets/images/default-avatar.png';
+        img.alt = `${employee.firstName} ${employee.lastName}`;
+        img.onerror = () => img.src = 'assets/images/default-avatar.png';
+        
+        photo.appendChild(img);
+
+        const name = document.createElement('p');
+        name.className = 'mini-employee-name';
+        name.textContent = `${employee.firstName} ${employee.lastName}`;
+
+        card.appendChild(photo);
+        card.appendChild(name);
+
+        return card;
     }
 
     /**
-     * Affiche un message d'erreur utilisateur
+     * Cache le spinner de chargement
      */
-    showError(message) {
-        const container = document.getElementById('employees-container');
-        if (container) {
-            container.innerHTML = `
-                <div class="error-message">
-                    <h3>⚠️ Erreur</h3>
-                    <p>${this.escapeHtml(message)}</p>
-                    <button onclick="trombinoscopeManager.refresh()" class="retry-btn">
-                        Réessayer
-                    </button>
-                </div>
-            `;
+    hideLoading() {
+        const loading = document.querySelector('.loading-message');
+        if (loading) {
+            loading.style.display = 'none';
         }
     }
 
     /**
-     * Rafraîchit le trombinoscope
+     * Affiche un message d'erreur
      */
-    async refresh() {
-        console.log('🔄 Rafraîchissement du trombinoscope...');
-        this.retryCount = 0;
-        this.employees = [];
-        await this.init();
-    }
-}
-
-// Instance globale du gestionnaire
-let trombinoscopeManager;
-
-// Initialisation sécurisée au chargement de la page
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        console.log('🚀 Démarrage du trombinoscope...');
-        
-        // Attendre que DataManager soit disponible
-        let attempts = 0;
-        while (typeof window.DataManager === 'undefined' && attempts < 10) {
-            console.log('⏳ Attente du DataManager...');
-            await new Promise(resolve => setTimeout(resolve, 500));
-            attempts++;
-        }
-        
-        if (typeof window.DataManager === 'undefined') {
-            throw new Error('DataManager non disponible après 5 secondes');
-        }
-        
-        // Créer et initialiser le gestionnaire
-        trombinoscopeManager = new TrombinoscopeManager();
-        await trombinoscopeManager.init();
-        
-    } catch (error) {
-        console.error('❌ Erreur fatale:', error);
-        
-        // Affichage d'erreur de secours
-        const container = document.getElementById('employees-container');
+    showError() {
+        const container = document.getElementById('trombinoscope-container');
         if (container) {
             container.innerHTML = `
                 <div class="error-message">
                     <h3>❌ Erreur de chargement</h3>
-                    <p>Impossible de charger le trombinoscope.</p>
-                    <button onclick="window.location.reload()" class="retry-btn">
-                        Recharger la page
-                    </button>
+                    <p>Impossible de charger les données du trombinoscope.</p>
+                    <button onclick="location.reload()" class="retry-btn">Réessayer</button>
                 </div>
             `;
         }
     }
+}
+
+// Initialisation automatique quand le DOM est prêt
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Initialisation du trombinoscope...');
+    new TrombinoscopeManager();
 });
