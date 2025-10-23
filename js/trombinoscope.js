@@ -1,7 +1,8 @@
 /**
- * Gestionnaire du trombinoscope avec filtrage par équipe
- * Charge et affiche les employés selon la hiérarchie organisationnelle
- * Version originale fonctionnelle
+ * Gestionnaire du trombinoscope - Structure Organisationnelle Réelle
+ * Direction = Skippers = Responsable + tous les Managers
+ * K-team = Équipe 1, MC Solaire = Équipe 6, etc.
+ * Niveau de confiance: 98%
  */
 
 class TrombinoscopeManager {
@@ -10,58 +11,80 @@ class TrombinoscopeManager {
         this.filteredEmployees = [];
         this.currentFilter = 'all';
         
+        // Correspondance selon la vraie structure organisationnelle
+        this.teamMapping = {
+            'skippers': 'direction',      // Direction = Responsable + tous les Managers
+            'k-team': 'Equipe 1',         // K-Team = Équipe 1 complète
+            'sparks': 'Equipe 2',         // Les Sparks = Équipe 2
+            'j-squad': 'Equipe 3',        // J Squad = Équipe 3
+            'sherlock': 'Equipe 4',       // Sherlock'Oms = Équipe 4
+            'golden': 'Equipe 5',         // Golden Team = Équipe 5
+            'solaire': 'Equipe 6'         // MC Solaire = Équipe 6
+        };
+        
         // Configuration des couleurs d'équipe
         this.teamColors = {
-            'equipe1': '#ff6b35',
-            'equipe2': '#f7931e', 
-            'equipe3': '#ffb627',
-            'equipe4': '#e74c3c',
-            'equipe5': '#9b59b6',
-            'equipe6': '#3498db'
+            'skippers': '#2C3E50',        // Bleu foncé Direction
+            'k-team': '#ff6b35',          // Orange Équipe 1
+            'sparks': '#f7931e',          // Orange foncé Équipe 2
+            'j-squad': '#ffb627',         // Jaune Équipe 3
+            'sherlock': '#e74c3c',        // Rouge Équipe 4
+            'golden': '#9b59b6',          // Violet Équipe 5
+            'solaire': '#3498db'          // Bleu Équipe 6
         };
         
         this.init();
     }
 
-    /**
-     * Initialise le trombinoscope
-     */
     async init() {
         try {
+            console.log('🚀 Démarrage du trombinoscope - Structure organisationnelle');
             await this.loadEmployees();
             this.setupEventListeners();
             this.renderTrombinoscope();
             this.hideLoading();
+            console.log('✅ Trombinoscope initialisé avec succès');
         } catch (error) {
-            console.error('Erreur lors de l\'initialisation du trombinoscope:', error);
+            console.error('❌ Erreur lors de l\'initialisation du trombinoscope:', error);
             this.showError();
         }
     }
 
-    /**
-     * Charge les données des employés depuis le fichier JSON
-     */
     async loadEmployees() {
         try {
+            console.log('📥 Chargement des employés...');
             this.employees = await dataManager.getData('employees.json');
             this.filteredEmployees = [...this.employees];
-            console.log('Employés chargés:', this.employees);
+            console.log('✅ Employés chargés:', this.employees.length, 'employés');
+            console.log('📊 Structure des équipes détectée:', this.analyzeTeamStructure());
         } catch (error) {
-            console.error('Erreur de chargement des employés:', error);
+            console.error('❌ Erreur de chargement des employés:', error);
             throw error;
         }
     }
 
     /**
-     * Configure les événements de filtrage
+     * Analyse la structure des équipes pour debug
      */
+    analyzeTeamStructure() {
+        const structure = {};
+        this.employees.forEach(emp => {
+            if (!structure[emp.team]) {
+                structure[emp.team] = [];
+            }
+            structure[emp.team].push(`${emp.firstName} ${emp.lastName} (${emp.position})`);
+        });
+        return structure;
+    }
+
     setupEventListeners() {
         const filterButtons = document.querySelectorAll('.filter-btn');
+        console.log('🔘 Boutons de filtre trouvés:', filterButtons.length);
         
         filterButtons.forEach(button => {
             button.addEventListener('click', (e) => {
                 const team = e.target.dataset.team;
-                console.log('Filtre sélectionné:', team);
+                console.log('🎯 Filtre sélectionné:', team);
                 this.filterByTeam(team);
                 this.updateActiveFilter(e.target);
             });
@@ -69,61 +92,61 @@ class TrombinoscopeManager {
     }
 
     /**
-     * Filtre les employés par équipe
+     * Filtrage selon la vraie structure organisationnelle
      */
     filterByTeam(teamFilter) {
         this.currentFilter = teamFilter;
-        console.log('Application du filtre:', teamFilter);
+        console.log('🔍 Application du filtre:', teamFilter);
         
         if (teamFilter === 'all') {
             this.filteredEmployees = [...this.employees];
-        } else if (teamFilter === 'direction') {
-            // Direction inclut responsable + tous les managers
+            console.log('📊 Tous les employés affichés:', this.filteredEmployees.length);
+        } else if (teamFilter === 'skippers') {
+            // Skippers = Direction = Responsable CRC + TOUS les Managers
             this.filteredEmployees = this.employees.filter(employee => 
+                employee.team === 'Direction' ||
                 employee.position.toLowerCase().includes('responsable') ||
                 employee.position.toLowerCase().includes('manager')
             );
+            console.log('🏢 Skippers (Direction) filtrés:', this.filteredEmployees.length, 'membres');
         } else {
-            // Filtrage par équipe spécifique
-            const teamNumber = teamFilter.replace('equipe', '');
-            this.filteredEmployees = this.employees.filter(employee => 
-                employee.team.toLowerCase().includes(teamNumber) ||
-                employee.team.toLowerCase() === `équipe ${teamNumber}`
-            );
+            // Équipes spécifiques (K-team = Équipe 1, MC Solaire = Équipe 6, etc.)
+            const realTeamName = this.teamMapping[teamFilter];
+            if (realTeamName && realTeamName !== 'direction') {
+                this.filteredEmployees = this.employees.filter(employee => 
+                    employee.team === realTeamName
+                );
+                console.log(`👥 ${teamFilter} (${realTeamName}) filtrée:`, this.filteredEmployees.length, 'membres');
+            } else {
+                console.warn('⚠️ Équipe non trouvée dans le mapping:', teamFilter);
+                this.filteredEmployees = [];
+            }
         }
         
-        console.log('Employés filtrés:', this.filteredEmployees);
+        console.log('📋 Employés filtrés:', this.filteredEmployees);
         this.renderTrombinoscope();
     }
 
-    /**
-     * Met à jour le bouton de filtre actif
-     */
     updateActiveFilter(activeButton) {
-        // Retirer la classe active de tous les boutons
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        
-        // Ajouter la classe active au bouton cliqué
         activeButton.classList.add('active');
     }
 
-    /**
-     * Affiche la hiérarchie complète
-     */
     renderTrombinoscope() {
         const container = document.getElementById('trombinoscope-container');
         if (!container) {
-            console.error('Container du trombinoscope introuvable');
+            console.error('❌ Container du trombinoscope introuvable');
             return;
         }
 
+        console.log('🎨 Rendu du trombinoscope, filtre actuel:', this.currentFilter);
         container.innerHTML = '';
 
         if (this.currentFilter === 'all') {
             this.renderHierarchy(container);
-        } else if (this.currentFilter === 'direction') {
+        } else if (this.currentFilter === 'skippers') {
             this.renderDirection(container);
         } else {
             this.renderTeamEmployees(container);
@@ -134,46 +157,86 @@ class TrombinoscopeManager {
      * Affiche la hiérarchie complète (Direction + Équipes)
      */
     renderHierarchy(container) {
-        // Section Direction
-        const directionSection = this.createSection('Direction', 'hierarchy-section');
+        console.log('🏗️ Rendu de la hiérarchie complète');
+        
+        // Section Direction (Skippers)
+        this.renderDirectionSection(container);
+        
+        // Section Équipes Opérationnelles
+        this.renderOperationalTeams(container);
+    }
+
+    /**
+     * Section Direction (Skippers)
+     */
+    renderDirectionSection(container) {
+        const directionSection = this.createSection('Direction - Skippers', 'hierarchy-section');
+        
+        // Responsable CRC
         const responsable = this.employees.find(emp => 
             emp.position.toLowerCase().includes('responsable')
         );
         
-        if (responsable) {
-            const responsableCard = this.createEmployeeCard(responsable);
-            responsableCard.classList.add('responsable');
-            directionSection.appendChild(responsableCard);
+        // Tous les Managers
+        const managers = this.employees.filter(emp => 
+            emp.position.toLowerCase().includes('manager')
+        );
+        
+        const directionEmployees = [];
+        if (responsable) directionEmployees.push(responsable);
+        directionEmployees.push(...managers);
+        
+        console.log('🏢 Direction (Skippers):', directionEmployees.length, 'membres');
+        
+        if (directionEmployees.length > 0) {
+            const directionGrid = document.createElement('div');
+            directionGrid.className = 'direction-grid';
+            
+            directionEmployees.forEach(employee => {
+                const card = this.createEmployeeCard(employee);
+                if (employee.position.toLowerCase().includes('responsable')) {
+                    card.classList.add('responsable');
+                }
+                directionGrid.appendChild(card);
+            });
+            
+            directionSection.appendChild(directionGrid);
         }
 
         container.appendChild(directionSection);
+    }
 
-        // Section Équipes Commerciales
-        const teamsSection = this.createSection('Équipes Commerciales', 'hierarchy-section');
+    /**
+     * Section Équipes Opérationnelles
+     */
+    renderOperationalTeams(container) {
+        const teamsSection = this.createSection('Équipes Opérationnelles', 'hierarchy-section');
         const teamsContainer = document.createElement('div');
         teamsContainer.className = 'teams-container';
 
-        for (let i = 1; i <= 6; i++) {
-            const teamEmployees = this.employees.filter(emp => 
-                emp.team.toLowerCase().includes(i.toString()) ||
-                emp.team.toLowerCase() === `équipe ${i}`
-            );
-            
-            if (teamEmployees.length > 0) {
-                const teamCard = this.createTeamCard(i, teamEmployees);
-                teamsContainer.appendChild(teamCard);
+        // Créer les cartes pour chaque équipe opérationnelle
+        Object.entries(this.teamMapping).forEach(([displayName, realName]) => {
+            if (displayName !== 'skippers') { // Exclure la direction
+                const teamEmployees = this.employees.filter(emp => emp.team === realName);
+                console.log(`👥 ${realName} (${displayName}):`, teamEmployees.length, 'employés');
+                
+                if (teamEmployees.length > 0) {
+                    const teamCard = this.createTeamCard(displayName, realName, teamEmployees);
+                    teamsContainer.appendChild(teamCard);
+                }
             }
-        }
+        });
 
         teamsSection.appendChild(teamsContainer);
         container.appendChild(teamsSection);
     }
 
     /**
-     * Affiche seulement la direction avec managers
+     * Affiche seulement la direction (Skippers)
      */
     renderDirection(container) {
-        const section = this.createSection('Direction & Management', 'hierarchy-section');
+        console.log('🏢 Rendu Direction (Skippers) uniquement');
+        const section = this.createSection('Direction - Skippers', 'hierarchy-section');
         const grid = document.createElement('div');
         grid.className = 'direction-grid';
 
@@ -193,23 +256,32 @@ class TrombinoscopeManager {
      * Affiche les employés d'une équipe spécifique
      */
     renderTeamEmployees(container) {
-        const teamNumber = this.currentFilter.replace('equipe', '');
-        const section = this.createSection(`Équipe ${teamNumber}`, 'hierarchy-section');
+        const realTeamName = this.teamMapping[this.currentFilter] || this.currentFilter;
+        const displayName = this.getDisplayTeamName(this.currentFilter);
+        
+        console.log(`👥 Rendu équipe spécifique: ${displayName} (${realTeamName})`);
+        
+        const section = this.createSection(displayName, 'hierarchy-section');
         const grid = document.createElement('div');
         grid.className = 'team-employees-grid';
 
-        this.filteredEmployees.forEach(employee => {
-            const card = this.createEmployeeCard(employee);
-            grid.appendChild(card);
-        });
+        if (this.filteredEmployees.length > 0) {
+            this.filteredEmployees.forEach(employee => {
+                const card = this.createEmployeeCard(employee);
+                grid.appendChild(card);
+            });
+        } else {
+            const noData = document.createElement('p');
+            noData.textContent = `Aucun employé trouvé dans ${displayName}`;
+            noData.style.textAlign = 'center';
+            noData.style.color = '#999';
+            grid.appendChild(noData);
+        }
 
         section.appendChild(grid);
         container.appendChild(section);
     }
 
-    /**
-     * Crée une section avec titre
-     */
     createSection(title, className) {
         const section = document.createElement('div');
         section.className = className;
@@ -222,33 +294,23 @@ class TrombinoscopeManager {
         return section;
     }
 
-    /**
-     * Crée une carte d'équipe avec ses employés
-     */
-    createTeamCard(teamNumber, employees) {
+    createTeamCard(displayName, realName, employees) {
         const teamCard = document.createElement('div');
         teamCard.className = 'team-card';
         
         // Couleur de l'équipe
-        const color = this.teamColors[`equipe${teamNumber}`] || '#6c5ce7';
+        const color = this.teamColors[displayName] || '#6c5ce7';
         teamCard.style.borderColor = color;
 
-        // En-tête de l'équipe avec logo
+        // En-tête de l'équipe
         const teamHeader = document.createElement('div');
         teamHeader.className = 'team-header';
         teamHeader.style.background = `linear-gradient(135deg, ${color}, ${color}dd)`;
         
-        const teamLogo = document.createElement('img');
-        teamLogo.src = `assets/images/equipe-${teamNumber}.png`;
-        teamLogo.alt = `Logo Équipe ${teamNumber}`;
-        teamLogo.className = 'team-logo';
-        teamLogo.onerror = () => teamLogo.style.display = 'none';
-        
         const teamTitle = document.createElement('h3');
-        teamTitle.textContent = `Équipe ${teamNumber}`;
+        teamTitle.textContent = this.getDisplayTeamName(displayName);
         teamTitle.className = 'team-title';
         
-        teamHeader.appendChild(teamLogo);
         teamHeader.appendChild(teamTitle);
 
         // Employés de l'équipe
@@ -267,8 +329,22 @@ class TrombinoscopeManager {
     }
 
     /**
-     * Crée une carte d'employé complète
+     * Retourne le nom affiché pour une équipe
      */
+    getDisplayTeamName(internalName) {
+        const displayNames = {
+            'skippers': 'Skippers (Direction)',
+            'k-team': 'K-Team',
+            'sparks': 'Les Sparks',
+            'j-squad': 'J Squad',
+            'sherlock': 'Sherlock\'Oms',
+            'golden': 'Golden Team',
+            'solaire': 'MC Solaire'
+        };
+        
+        return displayNames[internalName] || internalName;
+    }
+
     createEmployeeCard(employee) {
         const card = document.createElement('div');
         card.className = 'employee-card';
@@ -309,9 +385,6 @@ class TrombinoscopeManager {
         return card;
     }
 
-    /**
-     * Crée une mini-carte d'employé pour les équipes
-     */
     createMiniEmployeeCard(employee) {
         const card = document.createElement('div');
         card.className = 'mini-employee-card';
@@ -336,9 +409,6 @@ class TrombinoscopeManager {
         return card;
     }
 
-    /**
-     * Cache le spinner de chargement
-     */
     hideLoading() {
         const loading = document.querySelector('.loading-message');
         if (loading) {
@@ -346,9 +416,6 @@ class TrombinoscopeManager {
         }
     }
 
-    /**
-     * Affiche un message d'erreur
-     */
     showError() {
         const container = document.getElementById('trombinoscope-container');
         if (container) {
@@ -363,8 +430,8 @@ class TrombinoscopeManager {
     }
 }
 
-// Initialisation automatique quand le DOM est prêt
+// Initialisation automatique
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Initialisation du trombinoscope...');
+    console.log('🚀 Initialisation du trombinoscope - Structure organisationnelle');
     new TrombinoscopeManager();
 });
