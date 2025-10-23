@@ -1,14 +1,14 @@
 [
   {
     "id": "resp_001",
-    "firstName": "Jean",
-    "lastName": "Dupont",
+    "firstName": "Sandrine",
+    "lastName": "VOGT",
     "position": "Responsable CRC",
     "team": "Direction",
-    "email": "jean.dupont@macif.fr",
-    "photo": "assets/images/jean-dupont.jpg",
+    "email": "sandrine.vogt@macif.fr",
+    "photo": "assets/images/sandrine-vogt.png",
     "birthday": "1975-05-15",
-    "startDate": "2010-01-15"
+    "startDate": "2000-01-15"
   },
   {
     "id": "mgr_001",
