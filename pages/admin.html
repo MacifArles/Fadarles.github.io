@@ -1,1 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Fad'Arles</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/admin.css">
+</head>
+<body>
+    <!-- Header principal -->
+    <header class="main-header">
+        <nav>
+            <div class="nav-container">
+                <div class="logo">
+                    <h1>Fad'Arles - Administration</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="../index.html">Accueil</a></li>
+                    <li><a href="../pages/trombinoscope.html">Trombinoscope</a></li>
+                    <li><a href="#" id="logout-btn" style="display: none;">Déconnexion</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
 
+    <main class="admin-container">
+        <!-- Section d'authentification -->
+        <section id="auth-section" class="auth-section">
+            <div class="auth-card">
+                <h2>Connexion Administration</h2>
+                <form id="auth-form">
+                    <div class="form-group">
+                        <label for="admin-email">Email administrateur :</label>
+                        <input type="email" id="admin-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">Mot de passe :</label>
+                        <input type="password" id="admin-password" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Se connecter</button>
+                </form>
+                <div id="auth-error" class="error-message" style="display: none;"></div>
+            </div>
+        </section>
+
+        <!-- Tableau de bord admin -->
+        <section id="dashboard-section" class="dashboard-section" style="display: none;">
+            <div class="dashboard-header">
+                <h2>Tableau de Bord</h2>
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <h3 id="total-employees">0</h3>
+                        <p>Employés Total</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="total-teams">7</h3>
+                        <p>Équipes (+ Direction)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation des sections admin -->
+            <div class="admin-nav">
+                <button class="admin-nav-btn active" data-section="employees">Gestion Employés</button>
+                <button class="admin-nav-btn" data-section="teams">Gestion Équipes</button>
+                <button class="admin-nav-btn" data-section="settings">Paramètres</button>
+            </div>
+
+            <!-- Section Gestion Employés -->
+            <div id="employees-section" class="admin-section active">
+                <div class="section-header">
+                    <h3>Gestion des Employés</h3>
+                    <button id="add-employee-btn" class="btn-primary">Ajouter un Employé</button>
+                </div>
+
+                <!-- Filtres et recherche -->
+                <div class="filters-section">
+                    <div class="search-group">
+                        <input type="text" id="search-employee" placeholder="Rechercher un employé...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="filter-team">
+                            <option value="">Toutes les équipes</option>
+                            <option value="Direction">Direction</option>
+                            <option value="Equipe 1">Équipe 1</option>
+                            <option value="Equipe 2">Équipe 2</option>
+                            <option value="Equipe 3">Équipe 3</option>
+                            <option value="Equipe 4">Équipe 4</option>
+                            <option value="Equipe 5">Équipe 5</option>
+                            <option value="Equipe 6">Équipe 6</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Liste des employés -->
+                <div class="employees-list" id="employees-list">
+                    <!-- Les employés seront chargés dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Section Gestion Équipes -->
+            <div id="teams-section" class="admin-section">
+                <div class="section-header">
+                    <h3>Gestion des Équipes</h3>
+                </div>
+                <div class="teams-grid" id="teams-grid">
+                    <!-- Les équipes seront chargées dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Section Paramètres -->
+            <div id="settings-section" class="admin-section">
+                <div class="section-header">
+                    <h3>Paramètres Système</h3>
+                </div>
+                <div class="settings-content">
+                    <div class="settings-group">
+                        <h4>Configuration GitHub</h4>
+                        <div class="form-group">
+                            <label for="github-token">Token GitHub :</label>
+                            <input type="password" id="github-token" placeholder="Saisir votre token GitHub">
+                            <small>Nécessaire pour modifier les données du site</small>
+                        </div>
+                        <button id="save-github-settings" class="btn-secondary">Sauvegarder</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal pour ajouter/modifier un employé -->
+        <div id="employee-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Ajouter un Employé</h3>
+                    <span class="close" id="close-modal">&times;</span>
+                </div>
+                <form id="employee-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employee-firstname">Prénom *</label>
+                            <input type="text" id="employee-firstname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-lastname">Nom *</label>
+                            <input type="text" id="employee-lastname" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employee-position">Poste *</label>
+                        <input type="text" id="employee-position" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employee-team">Équipe *</label>
+                        <select id="employee-team" required>
+                            <option value="">Sélectionner une équipe</option>
+                            <option value="Direction">Direction</option>
+                            <option value="Equipe 1">Équipe 1</option>
+                            <option value="Equipe 2">Équipe 2</option>
+                            <option value="Equipe 3">Équipe 3</option>
+                            <option value="Equipe 4">Équipe 4</option>
+                            <option value="Equipe 5">Équipe 5</option>
+                            <option value="Equipe 6">Équipe 6</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employee-email">Email</label>
+                        <input type="email" id="employee-email">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employee-birthday">Date de naissance</label>
+                            <input type="date" id="employee-birthday">
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-startdate">Date d'arrivée</label>
+                            <input type="date" id="employee-startdate">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employee-photo">Photo</label>
+                        <input type="file" id="employee-photo" accept="image/*">
+                        <div id="photo-preview" class="photo-preview"></div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" id="cancel-employee" class="btn-secondary">Annuler</button>
+                        <button type="submit" class="btn-primary">Sauvegarder</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Messages de notification -->
+    <div id="notification" class="notification" style="display: none;">
+        <span id="notification-message"></span>
+        <span class="notification-close">&times;</span>
+    </div>
+
+    <script src="../js/data-manager.js"></script>
+    <script src="../js/admin.js"></script>
+</body>
+</html>
