@@ -3,137 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Admin - Fad'Arles</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        .test-form {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="email"], input[type="password"] {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #ff6b35;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #e55a2d;
-        }
-        .debug-info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
-        }
-        .error {
-            color: red;
-            margin-top: 10px;
-            padding: 10px;
-            background: #ffebee;
-            border-radius: 5px;
-        }
-        .success {
-            color: green;
-            margin-top: 10px;
-            padding: 10px;
-            background: #e8f5e8;
-            border-radius: 5px;
-        }
-    </style>
+    <title>Administration - Fad'Arles</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/admin.css">
 </head>
 <body>
-    <div class="test-form">
-        <h2>🔧 Test Connexion Admin</h2>
-        <p>Page de diagnostic pour tester la connexion d'administration</p>
-        
-        <form id="test-form">
-            <div class="form-group">
-                <label for="test-email">Email :</label>
-                <input type="email" id="test-email" value="admin@fadarles.com" required>
+    <!-- Header principal -->
+    <header class="main-header">
+        <nav>
+            <div class="nav-container">
+                <div class="logo">
+                    <h1>Fad'Arles - Administration</h1>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="../index.html">Accueil</a></li>
+                    <li><a href="../pages/trombinoscope.html">Trombinoscope</a></li>
+                    <li><a href="#" id="logout-btn" style="display: none;">Déconnexion</a></li>
+                </ul>
             </div>
-            
-            <div class="form-group">
-                <label for="test-password">Mot de passe :</label>
-                <input type="password" id="test-password" value="FadArles2024!" required>
+        </nav>
+    </header>
+
+    <main class="admin-container">
+        <!-- Section d'authentification -->
+        <section id="auth-section" class="auth-section">
+            <div class="auth-card">
+                <h2>Connexion Administration</h2>
+                <form id="auth-form">
+                    <div class="form-group">
+                        <label for="admin-email">Email administrateur :</label>
+                        <input type="email" id="admin-email" value="admin@fadarles.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">Mot de passe :</label>
+                        <input type="password" id="admin-password" value="FadArles2024!" required>
+                    </div>
+                    <button type="submit" class="btn-primary">Se connecter</button>
+                </form>
+                <div id="auth-error" class="error-message" style="display: none;"></div>
+                
+                <!-- Debug info -->
+                <div class="debug-info" style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; font-size: 12px;">
+                    <strong>🔧 Diagnostic :</strong><br>
+                    <div id="auth-debug">Chargement...</div>
+                </div>
             </div>
-            
-            <button type="submit">🔐 Tester la Connexion</button>
-        </form>
-        
-        <div id="test-result"></div>
-        
-        <div class="debug-info">
-            <strong>📋 Informations de Diagnostic :</strong><br>
-            <div id="debug-log">Chargement...</div>
+        </section>
+
+        <!-- Tableau de bord admin -->
+        <section id="dashboard-section" class="dashboard-section" style="display: none;">
+            <div class="dashboard-header">
+                <h2>Tableau de Bord Administration</h2>
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <h3 id="total-employees">0</h3>
+                        <p>Employés Total</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="total-teams">7</h3>
+                        <p>Équipes (+ Direction)</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="github-status">❌</h3>
+                        <p>GitHub Token</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation des sections admin -->
+            <div class="admin-nav">
+                <button class="admin-nav-btn active" data-section="employees">👥 Gestion Employés</button>
+                <button class="admin-nav-btn" data-section="github">⚙️ Configuration GitHub</button>
+                <button class="admin-nav-btn" data-section="debug">🔧 Diagnostic</button>
+            </div>
+
+            <!-- Section Gestion Employés -->
+            <div id="employees-section" class="admin-section active">
+                <div class="section-header">
+                    <h3>Gestion des Employés</h3>
+                    <button id="add-employee-btn" class="btn-primary">➕ Ajouter un Employé</button>
+                </div>
+
+                <!-- Filtres et recherche -->
+                <div class="filters-section">
+                    <div class="search-group">
+                        <input type="text" id="search-employee" placeholder="🔍 Rechercher un employé...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="filter-team">
+                            <option value="">Toutes les équipes</option>
+                            <option value="Direction">Direction</option>
+                            <option value="Equipe 1">Équipe 1</option>
+                            <option value="Equipe 2">Équipe 2</option>
+                            <option value="Equipe 3">Équipe 3</option>
+                            <option value="Equipe 4">Équipe 4</option>
+                            <option value="Equipe 5">Équipe 5</option>
+                            <option value="Equipe 6">Équipe 6</option>
+                        </select>
+                    </div>
+                    <button id="refresh-employees" class="btn-secondary">🔄 Actualiser</button>
+                </div>
+
+                <!-- Liste des employés -->
+                <div class="employees-list" id="employees-list">
+                    <div class="loading-message">Chargement des employés...</div>
+                </div>
+            </div>
+
+            <!-- Section Configuration GitHub -->
+            <div id="github-section" class="admin-section">
+                <div class="section-header">
+                    <h3>Configuration GitHub</h3>
+                </div>
+                <div class="settings-content">
+                    <div class="settings-group">
+                        <h4>🔑 Token GitHub</h4>
+                        <p>Configurez votre token GitHub pour pouvoir modifier les données du site.</p>
+                        <div class="form-group">
+                            <label for="github-token">Token GitHub :</label>
+                            <input type="password" id="github-token" placeholder="Saisir votre token GitHub">
+                            <small>Le token doit avoir les permissions 'repo' pour modifier le repository</small>
+                        </div>
+                        <div class="form-group">
+                            <button id="save-github-settings" class="btn-primary">💾 Sauvegarder Token</button>
+                            <button id="test-github-connection" class="btn-secondary">🧪 Tester Connexion</button>
+                        </div>
+                        <div id="github-status-message" class="status-message"></div>
+                        
+                        <div class="info-box">
+                            <h5>📋 Comment générer un token GitHub :</h5>
+                            <ol>
+                                <li>Allez sur GitHub.com → Settings → Developer settings</li>
+                                <li>Personal access tokens → Generate new token (classic)</li>
+                                <li>Sélectionnez les permissions : <strong>repo</strong></li>
+                                <li>Copiez le token généré et collez-le ci-dessus</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section Diagnostic -->
+            <div id="debug-section" class="admin-section">
+                <div class="section-header">
+                    <h3>Informations de Diagnostic</h3>
+                </div>
+                <div class="debug-content">
+                    <div class="debug-group">
+                        <h4>🔧 État du Système</h4>
+                        <div class="debug-info-detailed">
+                            <div id="system-debug">Chargement...</div>
+                        </div>
+                    </div>
+                    <div class="debug-group">
+                        <h4>📊 Données Chargées</h4>
+                        <div class="debug-info-detailed">
+                            <div id="data-debug">Chargement...</div>
+                        </div>
+                    </div>
+                    <div class="debug-group">
+                        <h4>🛠️ Actions de Maintenance</h4>
+                        <button id="clear-cache" class="btn-secondary">🗑️ Vider le Cache</button>
+                        <button id="reload-data" class="btn-secondary">🔄 Recharger les Données</button>
+                        <button id="export-data" class="btn-secondary">📤 Exporter les Données</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modal pour ajouter/modifier un employé -->
+        <div id="employee-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Ajouter un Employé</h3>
+                    <span class="close" id="close-modal">&times;</span>
+                </div>
+                <form id="employee-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employee-firstname">Prénom *</label>
+                            <input type="text" id="employee-firstname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-lastname">Nom *</label>
+                            <input type="text" id="employee-lastname" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employee-position">Poste *</label>
+                        <input type="text" id="employee-position" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employee-team">Équipe *</label>
+                        <select id="employee-team" required>
+                            <option value="">Sélectionner une équipe</option>
+                            <option value="Direction">Direction</option>
+                            <option value="Equipe 1">Équipe 1</option>
+                            <option value="Equipe 2">Équipe 2</option>
+                            <option value="Equipe 3">Équipe 3</option>
+                            <option value="Equipe 4">Équipe 4</option>
+                            <option value="Equipe 5">Équipe 5</option>
+                            <option value="Equipe 6">Équipe 6</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employee-email">Email</label>
+                        <input type="email" id="employee-email">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="employee-birthday">Date de naissance</label>
+                            <input type="date" id="employee-birthday">
+                        </div>
+                        <div class="form-group">
+                            <label for="employee-startdate">Date d'arrivée</label>
+                            <input type="date" id="employee-startdate">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="employee-photo">Photo</label>
+                        <input type="file" id="employee-photo" accept="image/*">
+                        <div id="photo-preview" class="photo-preview"></div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button type="button" id="cancel-employee" class="btn-secondary">Annuler</button>
+                        <button type="submit" class="btn-primary">💾 Sauvegarder</button>
+                    </div>
+                </form>
+            </div>
         </div>
-        
-        <div style="margin-top: 20px;">
-            <button onclick="location.href='admin.html'" style="background: #007bff;">
-                🚀 Aller vers l'Admin Réel
-            </button>
-        </div>
+    </main>
+
+    <!-- Messages de notification -->
+    <div id="notification" class="notification" style="display: none;">
+        <span id="notification-message"></span>
+        <span class="notification-close">&times;</span>
     </div>
 
     <script>
-        // Configuration de test (identique à l'admin réel)
-        const testConfig = {
+        // Configuration admin - identique au test qui fonctionne
+        const adminConfig = {
             adminEmails: [
                 'admin@fadarles.com',
                 'direction@fadarles.com',
                 'rh@fadarles.com'
             ],
-            adminPassword: 'FadArles2024!'
+            adminPassword: 'FadArles2024!',
+            maxFileSize: 5 * 1024 * 1024, // 5MB max pour les images
+            allowedImageTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
         };
 
-        // Logs de diagnostic
-        function addDebugLog(message) {
-            const debugLog = document.getElementById('debug-log');
-            const timestamp = new Date().toLocaleTimeString();
-            debugLog.innerHTML += `<br>[${timestamp}] ${message}`;
+        let currentUser = null;
+        let employees = [];
+        let isEditMode = false;
+        let currentEmployeeId = null;
+
+        // Fonctions utilitaires
+        function addDebugLog(message, containerId = 'auth-debug') {
+            const debugContainer = document.getElementById(containerId);
+            if (debugContainer) {
+                const timestamp = new Date().toLocaleTimeString();
+                debugContainer.innerHTML += `<br>[${timestamp}] ${message}`;
+            }
+            console.log(`[${new Date().toLocaleTimeString()}] ${message}`);
         }
 
-        // Validation email
         function validateEmail(email) {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
         }
 
-        // Affichage des résultats
-        function showResult(message, isSuccess) {
-            const resultDiv = document.getElementById('test-result');
-            resultDiv.innerHTML = `<div class="${isSuccess ? 'success' : 'error'}">${message}</div>`;
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const messageElement = document.getElementById('notification-message');
+            
+            notification.className = `notification ${type}`;
+            messageElement.textContent = message;
+            notification.style.display = 'flex';
+
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 4000);
         }
 
-        // Test de connexion
+        function showError(message) {
+            const errorElement = document.getElementById('auth-error');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+                setTimeout(() => {
+                    errorElement.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Test de connexion - basé sur admin-test.html qui fonctionne
         function testLogin(email, password) {
             addDebugLog(`🔍 Test avec email: ${email}`);
             addDebugLog(`🔍 Longueur mot de passe: ${password.length}`);
@@ -141,67 +317,335 @@
             // Validation email
             if (!validateEmail(email)) {
                 addDebugLog('❌ Format email invalide');
-                showResult('❌ Format d\'email invalide', false);
+                showError('❌ Format d\'email invalide');
                 return false;
             }
             
             // Validation mot de passe
             if (password.length < 8) {
                 addDebugLog('❌ Mot de passe trop court');
-                showResult('❌ Mot de passe trop court (min 8 caractères)', false);
+                showError('❌ Mot de passe trop court (min 8 caractères)');
                 return false;
             }
             
             // Test des identifiants
-            const emailMatch = testConfig.adminEmails.includes(email);
-            const passwordMatch = password === testConfig.adminPassword;
+            const emailMatch = adminConfig.adminEmails.includes(email);
+            const passwordMatch = password === adminConfig.adminPassword;
             
             addDebugLog(`✓ Email dans la liste: ${emailMatch}`);
             addDebugLog(`✓ Mot de passe correct: ${passwordMatch}`);
             
             if (emailMatch && passwordMatch) {
                 addDebugLog('✅ CONNEXION RÉUSSIE !');
-                showResult('✅ Connexion réussie ! Les identifiants sont corrects.', true);
                 return true;
             } else {
                 addDebugLog('❌ Identifiants incorrects');
-                showResult('❌ Email ou mot de passe incorrect', false);
+                showError('❌ Email ou mot de passe incorrect');
                 
                 if (!emailMatch) {
-                    addDebugLog(`💡 Emails autorisés: ${testConfig.adminEmails.join(', ')}`);
+                    addDebugLog(`💡 Emails autorisés: ${adminConfig.adminEmails.join(', ')}`);
                 }
                 return false;
             }
         }
 
-        // Initialisation des logs de diagnostic
-        document.addEventListener('DOMContentLoaded', function() {
-            addDebugLog('🚀 Page de test chargée');
-            addDebugLog(`📧 Emails configurés: ${testConfig.adminEmails.length}`);
-            addDebugLog(`🔒 Mot de passe configuré: ${testConfig.adminPassword ? 'OUI' : 'NON'}`);
-            addDebugLog('🎯 Prêt pour les tests');
+        // Connexion et affichage du dashboard
+        function handleLogin(email, password) {
+            if (testLogin(email, password)) {
+                currentUser = {
+                    email: email,
+                    loginTime: new Date().toISOString()
+                };
+                
+                localStorage.setItem('fadArlesAdminUser', JSON.stringify(currentUser));
+                showDashboard();
+                showNotification('✅ Connexion réussie !', 'success');
+                return true;
+            }
+            return false;
+        }
+
+        // Affichage du dashboard
+        function showDashboard() {
+            document.getElementById('auth-section').style.display = 'none';
+            document.getElementById('dashboard-section').style.display = 'block';
+            document.getElementById('logout-btn').style.display = 'block';
             
-            // Gestionnaire d'événement pour le formulaire
-            document.getElementById('test-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                addDebugLog('📝 Formulaire soumis');
+            loadEmployees();
+            updateSystemDebug();
+        }
+
+        // Affichage de l'auth
+        function showAuthForm() {
+            document.getElementById('auth-section').style.display = 'block';
+            document.getElementById('dashboard-section').style.display = 'none';
+            document.getElementById('logout-btn').style.display = 'none';
+        }
+
+        // Chargement des employés
+        async function loadEmployees() {
+            try {
+                addDebugLog('🔄 Chargement des employés...', 'data-debug');
                 
-                const email = document.getElementById('test-email').value.trim();
-                const password = document.getElementById('test-password').value;
-                
-                testLogin(email, password);
+                if (typeof window.dataManager !== 'undefined') {
+                    employees = await window.dataManager.getEmployees();
+                    addDebugLog(`✅ ${employees.length} employés chargés`, 'data-debug');
+                    renderEmployeesList();
+                    updateStats();
+                } else {
+                    addDebugLog('❌ DataManager non disponible', 'data-debug');
+                    showError('Erreur: DataManager non chargé');
+                }
+            } catch (error) {
+                addDebugLog(`❌ Erreur: ${error.message}`, 'data-debug');
+                showNotification('Erreur lors du chargement des données', 'error');
+                console.error('Erreur lors du chargement des employés:', error);
+            }
+        }
+
+        // Affichage de la liste des employés
+        function renderEmployeesList(filteredEmployees = null) {
+            const employeesToRender = filteredEmployees || employees;
+            const container = document.getElementById('employees-list');
+            
+            if (!container) return;
+
+            if (employeesToRender.length === 0) {
+                container.innerHTML = '<div class="no-employees">Aucun employé trouvé</div>';
+                return;
+            }
+
+            container.innerHTML = employeesToRender.map(employee => `
+                <div class="employee-card">
+                    <img src="${employee.photo || '../assets/images/default-avatar.png'}" 
+                         alt="Photo ${escapeHtml(employee.firstName)} ${escapeHtml(employee.lastName)}" 
+                         class="employee-photo"
+                         onerror="this.src='../assets/images/default-avatar.png'">
+                    <div class="employee-info">
+                        <h4>${escapeHtml(employee.firstName || '')} ${escapeHtml(employee.lastName || '')}</h4>
+                        <p><strong>${escapeHtml(employee.position || '')}</strong></p>
+                        <p>📧 ${escapeHtml(employee.email || 'Pas d\'email')}</p>
+                        <span class="employee-team team-${getTeamClass(employee.team)}">${escapeHtml(employee.team || '')}</span>
+                    </div>
+                    <div class="employee-actions">
+                        <button class="btn-edit" onclick="editEmployee('${employee.id}')">
+                            ✏️ Modifier
+                        </button>
+                        <button class="btn-delete" onclick="deleteEmployee('${employee.id}')">
+                            🗑️ Supprimer
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Conversion nom d'équipe en classe CSS
+        function getTeamClass(teamName) {
+            const teamMapping = {
+                'Direction': 'direction',
+                'Equipe 1': '1',
+                'Equipe 2': '2',
+                'Equipe 3': '3',
+                'Equipe 4': '4',
+                'Equipe 5': '5',
+                'Equipe 6': '6'
+            };
+            return teamMapping[teamName] || 'default';
+        }
+
+        // Mise à jour des statistiques
+        function updateStats() {
+            document.getElementById('total-employees').textContent = employees.length;
+            
+            // Status GitHub Token
+            const hasToken = localStorage.getItem('fadArlesGitHubToken');
+            document.getElementById('github-status').textContent = hasToken ? '✅' : '❌';
+        }
+
+        // Diagnostic système
+        function updateSystemDebug() {
+            const systemDebug = document.getElementById('system-debug');
+            if (systemDebug) {
+                systemDebug.innerHTML = `
+                    <strong>🔧 État des Scripts :</strong><br>
+                    - DataManager: ${typeof window.dataManager}<br>
+                    - Connexion: ${currentUser ? '✅ Connecté' : '❌ Non connecté'}<br>
+                    - GitHub Token: ${localStorage.getItem('fadArlesGitHubToken') ? '✅ Configuré' : '❌ Non configuré'}<br>
+                    - Employés chargés: ${employees.length}<br>
+                    - Navigateur: ${navigator.userAgent.split(')')[0] + ')'}<br>
+                    - URL: ${window.location.href}
+                `;
+            }
+        }
+
+        // Navigation entre sections
+        function switchSection(sectionName) {
+            // Masquer toutes les sections
+            document.querySelectorAll('.admin-section').forEach(section => {
+                section.classList.remove('active');
             });
             
-            // Test automatique au chargement
-            setTimeout(() => {
-                addDebugLog('🔄 Test automatique...');
-                testLogin('admin@fadarles.com', 'FadArles2024!');
-            }, 1000);
-        });
+            // Désactiver tous les boutons de navigation
+            document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
 
-        // Test de la console
-        console.log('🔧 Page de test admin chargée');
-        console.log('📊 Configuration:', testConfig);
+            // Activer la section demandée
+            document.getElementById(`${sectionName}-section`)?.classList.add('active');
+            document.querySelector(`[data-section="${sectionName}"]`)?.classList.add('active');
+
+            if (sectionName === 'debug') {
+                updateSystemDebug();
+            }
+        }
+
+        // Filtrage des employés
+        function filterEmployees() {
+            const searchTerm = document.getElementById('search-employee')?.value.toLowerCase() || '';
+            const teamFilter = document.getElementById('filter-team')?.value || '';
+            
+            let filtered = [...employees];
+
+            if (searchTerm) {
+                filtered = filtered.filter(emp => 
+                    (emp.firstName || '').toLowerCase().includes(searchTerm) ||
+                    (emp.lastName || '').toLowerCase().includes(searchTerm) ||
+                    (emp.position || '').toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (teamFilter) {
+                filtered = filtered.filter(emp => emp.team === teamFilter);
+            }
+
+            renderEmployeesList(filtered);
+        }
+
+        // Placeholder pour les fonctions d'édition
+        function editEmployee(employeeId) {
+            showNotification('Fonction d\'édition en cours de développement', 'warning');
+        }
+
+        function deleteEmployee(employeeId) {
+            const employee = employees.find(emp => emp.id === employeeId);
+            if (employee && confirm(`Supprimer ${employee.firstName} ${employee.lastName} ?`)) {
+                showNotification('Fonction de suppression en cours de développement', 'warning');
+            }
+        }
+
+        // Initialisation au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            addDebugLog('🚀 Page admin chargée');
+            addDebugLog(`📊 DataManager disponible: ${typeof window.dataManager}`);
+            addDebugLog(`📧 Emails configurés: ${adminConfig.adminEmails.length}`);
+            addDebugLog(`🔒 Mot de passe configuré: ${adminConfig.adminPassword ? 'OUI' : 'NON'}`);
+
+            // Vérification de session existante
+            const storedUser = localStorage.getItem('fadArlesAdminUser');
+            if (storedUser) {
+                currentUser = JSON.parse(storedUser);
+                showDashboard();
+                addDebugLog('✅ Session restaurée');
+            } else {
+                addDebugLog('ℹ️ Aucune session active');
+            }
+
+            // Événements du formulaire de connexion
+            document.getElementById('auth-form')?.addEventListener('submit', function(e) {
+                e.preventDefault();
+                addDebugLog('📝 Tentative de connexion...');
+                
+                const email = document.getElementById('admin-email').value.trim();
+                const password = document.getElementById('admin-password').value;
+                
+                handleLogin(email, password);
+            });
+
+            // Déconnexion
+            document.getElementById('logout-btn')?.addEventListener('click', function() {
+                localStorage.removeItem('fadArlesAdminUser');
+                currentUser = null;
+                showAuthForm();
+                showNotification('Déconnexion réussie', 'success');
+            });
+
+            // Navigation admin
+            document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    switchSection(e.target.dataset.section);
+                });
+            });
+
+            // Filtres et recherche
+            document.getElementById('search-employee')?.addEventListener('input', filterEmployees);
+            document.getElementById('filter-team')?.addEventListener('change', filterEmployees);
+            document.getElementById('refresh-employees')?.addEventListener('click', loadEmployees);
+
+            // Actions de maintenance
+            document.getElementById('clear-cache')?.addEventListener('click', function() {
+                if (window.dataManager?.clearCache) {
+                    window.dataManager.clearCache();
+                    showNotification('Cache vidé', 'success');
+                }
+            });
+
+            document.getElementById('reload-data')?.addEventListener('click', loadEmployees);
+
+            document.getElementById('export-data')?.addEventListener('click', async function() {
+                try {
+                    if (window.dataManager?.exportEmployees) {
+                        const data = await window.dataManager.exportEmployees('json');
+                        const blob = new Blob([data], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `employees-${new Date().toISOString().split('T')[0]}.json`;
+                        a.click();
+                        showNotification('Données exportées', 'success');
+                    }
+                } catch (error) {
+                    showNotification('Erreur lors de l\'export', 'error');
+                }
+            });
+
+            // Configuration GitHub
+            document.getElementById('save-github-settings')?.addEventListener('click', function() {
+                const token = document.getElementById('github-token').value.trim();
+                if (token) {
+                    localStorage.setItem('fadArlesGitHubToken', token);
+                    if (window.dataManager?.setGitHubToken) {
+                        window.dataManager.setGitHubToken(token);
+                    }
+                    showNotification('Token GitHub sauvegardé', 'success');
+                    document.getElementById('github-token').value = '';
+                    updateStats();
+                } else {
+                    showNotification('Veuillez saisir un token', 'error');
+                }
+            });
+
+            document.getElementById('test-github-connection')?.addEventListener('click', async function() {
+                try {
+                    if (window.dataManager?.testGitHubConnection) {
+                        const result = await window.dataManager.testGitHubConnection();
+                        showNotification('Connexion GitHub réussie', 'success');
+                    } else {
+                        showNotification('Token GitHub requis', 'warning');
+                    }
+                } catch (error) {
+                    showNotification(`Erreur GitHub: ${error.message}`, 'error');
+                }
+            });
+
+            // Fermeture notification
+            document.querySelector('.notification-close')?.addEventListener('click', () => {
+                document.getElementById('notification').style.display = 'none';
+            });
+
+            addDebugLog('✅ Événements configurés, prêt à l\'utilisation');
+        });
     </script>
+
+    <script src="../js/data-manager.js"></script>
 </body>
 </html>
