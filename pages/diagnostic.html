@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Diagnostic Complet - Fad'Arles</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .diagnostic-section {
+            background: rgba(255, 255, 255, 0.1);
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .status {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .status.success { background: rgba(39, 174, 96, 0.3); border: 1px solid #27ae60; }
+        .status.error { background: rgba(231, 76, 60, 0.3); border: 1px solid #e74c3c; }
+        .status.warning { background: rgba(243, 156, 18, 0.3); border: 1px solid #f39c12; }
+        .test-button {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+        }
+        .test-button:hover { background: #e55a2d; }
+        .log-area {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        h2 { color: #ff6b35; }
+        h3 { color: #f7931e; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Diagnostic Complet Fad'Arles</h1>
+    
+    <!-- Section 1: Test de Base -->
+    <div class="diagnostic-section">
+        <h2>📦 Test de Chargement des Scripts</h2>
+        <div id="script-status"></div>
+        <button class="test-button" onclick="testScriptLoading()">🔄 Tester le Chargement</button>
+        <div class="log-area" id="script-logs">Cliquez sur "Tester le Chargement" pour voir les résultats...</div>
+    </div>
+
+    <!-- Section 2: Test DataManager -->
+    <div class="diagnostic-section">
+        <h2>🗄️ Test DataManager</h2>
+        <div id="datamanager-status"></div>
+        <button class="test-button" onclick="testDataManager()">🧪 Tester DataManager</button>
+        <div class="log-area" id="datamanager-logs">En attente de test...</div>
+    </div>
+
+    <!-- Section 3: Test Employés -->
+    <div class="diagnostic-section">
+        <h2>👥 Test Chargement Employés</h2>
+        <div id="employees-status"></div>
+        <button class="test-button" onclick="testEmployeesLoading()">📥 Charger les Employés</button>
+        <div class="log-area" id="employees-logs">En attente de test...</div>
+        <div id="employees-display"></div>
+    </div>
+
+    <!-- Section 4: Test Filtrage -->
+    <div class="diagnostic-section">
+        <h2>🔍 Test Filtrage</h2>
+        <div>
+            <label>Recherche: <input type="text" id="test-search" placeholder="Tapez un nom..."></label>
+            <label>Équipe: 
+                <select id="test-team">
+                    <option value="">Toutes</option>
+                    <option value="Direction">Direction</option>
+                    <option value="Equipe 1">Équipe 1</option>
+                    <option value="Equipe 2">Équipe 2</option>
+                </select>
+            </label>
+            <button class="test-button" onclick="testFiltering()">🔍 Tester Filtres</button>
+        </div>
+        <div class="log-area" id="filter-logs">En attente de test...</div>
+    </div>
+
+    <!-- Section 5: Test GitHub -->
+    <div class="diagnostic-section">
+        <h2>🐙 Test GitHub</h2>
+        <div>
+            <label>Token GitHub: <input type="password" id="test-token" placeholder="Votre token..."></label>
+            <button class="test-button" onclick="testGitHub()">🔗 Tester GitHub</button>
+        </div>
+        <div class="log-area" id="github-logs">En attente de test...</div>
+    </div>
+
+    <!-- Section 6: Liens de Test -->
+    <div class="diagnostic-section">
+        <h2>🔗 Liens de Test</h2>
+        <button class="test-button" onclick="window.open('admin-test.html', '_blank')">🧪 Admin Test</button>
+        <button class="test-button" onclick="window.open('admin.html', '_blank')">⚙️ Admin Complet</button>
+        <button class="test-button" onclick="window.open('trombinoscope.html', '_blank')">👥 Trombinoscope</button>
+    </div>
+
+    <script src="../js/data-manager.js"></script>
+    <script>
+        let testEmployees = [];
+        
+        function log(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#e74c3c' : type === 'success' ? '#27ae60' : type === 'warning' ? '#f39c12' : '#3498db';
+            container.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function setStatus(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function testScriptLoading() {
+            log('script-logs', '🔄 Test de chargement des scripts...', 'info');
+            
+            // Test DataManager
+            if (typeof window.dataManager !== 'undefined') {
+                log('script-logs', '✅ DataManager chargé correctement', 'success');
+                setStatus('script-status', '✅ Scripts chargés correctement', 'success');
+            } else {
+                log('script-logs', '❌ DataManager non chargé', 'error');
+                setStatus('script-status', '❌ Problème de chargement DataManager', 'error');
+            }
+            
+            // Test des fonctions
+            const functions = ['getEmployees', 'getEmployeesByTeam', 'setGitHubToken'];
+            functions.forEach(func => {
+                if (window.dataManager && typeof window.dataManager[func] === 'function') {
+                    log('script-logs', `✅ Fonction ${func} disponible`, 'success');
+                } else {
+                    log('script-logs', `❌ Fonction ${func} manquante`, 'error');
+                }
+            });
+            
+            log('script-logs', `📊 URL actuelle: ${window.location.href}`, 'info');
+            log('script-logs', `🌐 Navigateur: ${navigator.userAgent.split(')')[0] + ')'}`, 'info');
+        }
+
+        async function testDataManager() {
+            log('datamanager-logs', '🧪 Test du DataManager...', 'info');
+            
+            if (typeof window.dataManager === 'undefined') {
+                log('datamanager-logs', '❌ DataManager non disponible', 'error');
+                setStatus('datamanager-status', '❌ DataManager non chargé', 'error');
+                return;
+            }
+            
+            try {
+                // Test de base
+                log('datamanager-logs', '📦 DataManager détecté', 'success');
+                
+                // Test config
+                if (window.dataManager.config) {
+                    log('datamanager-logs', `🔧 Repository: ${window.dataManager.config.owner}/${window.dataManager.config.repo}`, 'info');
+                    log('datamanager-logs', `🌐 Base URL: ${window.dataManager.config.baseUrl}`, 'info');
+                }
+                
+                // Test cache
+                if (window.dataManager.cache) {
+                    log('datamanager-logs', `💾 Cache: ${window.dataManager.cache.size} entrées`, 'info');
+                }
+                
+                setStatus('datamanager-status', '✅ DataManager fonctionnel', 'success');
+                
+            } catch (error) {
+                log('datamanager-logs', `❌ Erreur: ${error.message}`, 'error');
+                setStatus('datamanager-status', '❌ Erreur DataManager', 'error');
+            }
+        }
+
+        async function testEmployeesLoading() {
+            log('employees-logs', '👥 Chargement des employés...', 'info');
+            
+            if (typeof window.dataManager === 'undefined') {
+                log('employees-logs', '❌ DataManager non disponible', 'error');
+                setStatus('employees-status', '❌ DataManager requis', 'error');
+                return;
+            }
+            
+            try {
+                const employees = await window.dataManager.getEmployees();
+                testEmployees = employees;
+                
+                log('employees-logs', `✅ ${employees.length} employés chargés`, 'success');
+                
+                // Affichage des employés
+                employees.forEach((emp, index) => {
+                    log('employees-logs', `${index + 1}. ${emp.firstName} ${emp.lastName} - ${emp.position} (${emp.team})`, 'info');
+                });
+                
+                // Statistiques par équipe
+                const teamStats = {};
+                employees.forEach(emp => {
+                    teamStats[emp.team] = (teamStats[emp.team] || 0) + 1;
+                });
+                
+                log('employees-logs', '📊 Répartition par équipe:', 'info');
+                Object.entries(teamStats).forEach(([team, count]) => {
+                    log('employees-logs', `   ${team}: ${count} employé(s)`, 'info');
+                });
+                
+                setStatus('employees-status', `✅ ${employees.length} employés chargés`, 'success');
+                
+                // Affichage visual
+                const display = document.getElementById('employees-display');
+                display.innerHTML = `
+                    <h4>📋 Liste des Employés (${employees.length})</h4>
+                    ${employees.map(emp => `
+                        <div style="background: rgba(255,255,255,0.1); margin: 5px 0; padding: 10px; border-radius: 8px;">
+                            <strong>${emp.firstName} ${emp.lastName}</strong> - ${emp.position}<br>
+                            📧 ${emp.email || 'Pas d\'email'} | 🏢 ${emp.team}
+                        </div>
+                    `).join('')}
+                `;
+                
+            } catch (error) {
+                log('employees-logs', `❌ Erreur: ${error.message}`, 'error');
+                setStatus('employees-status', '❌ Erreur de chargement', 'error');
+            }
+        }
+
+        function testFiltering() {
+            log('filter-logs', '🔍 Test du filtrage...', 'info');
+            
+            if (testEmployees.length === 0) {
+                log('filter-logs', '❌ Aucun employé chargé, lancez d\'abord le test de chargement', 'error');
+                return;
+            }
+            
+            const searchTerm = document.getElementById('test-search').value.toLowerCase().trim();
+            const teamFilter = document.getElementById('test-team').value.trim();
+            
+            log('filter-logs', `🔍 Recherche: "${searchTerm}"`, 'info');
+            log('filter-logs', `🏢 Équipe: "${teamFilter}"`, 'info');
+            
+            let filtered = [...testEmployees];
+            
+            // Filtrage par recherche
+            if (searchTerm) {
+                const beforeCount = filtered.length;
+                filtered = filtered.filter(emp => 
+                    (emp.firstName || '').toLowerCase().includes(searchTerm) ||
+                    (emp.lastName || '').toLowerCase().includes(searchTerm) ||
+                    (emp.position || '').toLowerCase().includes(searchTerm)
+                );
+                log('filter-logs', `📝 Après recherche: ${filtered.length}/${beforeCount} employés`, 'info');
+            }
+            
+            // Filtrage par équipe
+            if (teamFilter) {
+                const beforeCount = filtered.length;
+                filtered = filtered.filter(emp => emp.team === teamFilter);
+                log('filter-logs', `🏢 Après filtre équipe: ${filtered.length}/${beforeCount} employés`, 'info');
+            }
+            
+            log('filter-logs', `✅ Résultat final: ${filtered.length} employé(s)`, 'success');
+            
+            // Affichage des résultats
+            if (filtered.length > 0) {
+                filtered.forEach((emp, index) => {
+                    log('filter-logs', `   ${index + 1}. ${emp.firstName} ${emp.lastName} (${emp.team})`, 'success');
+                });
+            } else {
+                log('filter-logs', '😔 Aucun employé ne correspond aux critères', 'warning');
+            }
+        }
+
+        async function testGitHub() {
+            log('github-logs', '🐙 Test GitHub...', 'info');
+            
+            const token = document.getElementById('test-token').value.trim();
+            
+            if (!token) {
+                log('github-logs', '❌ Token requis pour le test', 'error');
+                return;
+            }
+            
+            if (typeof window.dataManager === 'undefined') {
+                log('github-logs', '❌ DataManager non disponible', 'error');
+                return;
+            }
+            
+            try {
+                window.dataManager.setGitHubToken(token);
+                log('github-logs', '✅ Token configuré', 'success');
+                
+                const result = await window.dataManager.testGitHubConnection();
+                log('github-logs', '✅ Connexion GitHub réussie', 'success');
+                log('github-logs', `📝 Message: ${result.message}`, 'info');
+                
+            } catch (error) {
+                log('github-logs', `❌ Erreur GitHub: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            log('script-logs', '🚀 Page de diagnostic chargée', 'info');
+            setTimeout(testScriptLoading, 500);
+        });
+    </script>
+</body>
+</html>
