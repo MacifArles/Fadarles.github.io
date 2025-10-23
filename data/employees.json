@@ -22,10 +22,58 @@
     "startDate": "2015-03-01"
   },
   {
+    "id": "mgr_002",
+    "firstName": "Luc",
+    "lastName": "Moreau",
+    "position": "Manager d'Équipe",
+    "team": "Équipe 2",
+    "email": "luc.moreau@macif.fr",
+    "photo": "assets/images/luc-moreau.jpg",
+    "birthday": "1978-07-14",
+    "startDate": "2012-05-20"
+  }
+  {
+    "id": "mgr_003",
+    "firstName": "Luc",
+    "lastName": "Moreau",
+    "position": "Manager d'Équipe",
+    "team": "Équipe 3",
+    "email": "luc.moreau@macif.fr",
+    "photo": "assets/images/luc-moreau.jpg",
+    "birthday": "1978-07-14",
+    "startDate": "2012-05-20"
+  }
+
+  {
+    "id": "mgr_004",
+    "firstName": "Luc",
+    "lastName": "Moreau",
+    "position": "Manager d'Équipe",
+    "team": "Équipe 4",
+    "email": "luc.moreau@macif.fr",
+    "photo": "assets/images/luc-moreau.jpg",
+    "birthday": "1978-07-14",
+    "startDate": "2012-05-20"
+  }
+
+  {
+    "id": "mgr_005",
+    "firstName": "Luc",
+    "lastName": "Moreau",
+    "position": "Manager d'Équipe",
+    "team": "Équipe 5",
+    "email": "luc.moreau@macif.fr",
+    "photo": "assets/images/luc-moreau.jpg",
+    "birthday": "1978-07-14",
+    "startDate": "2012-05-20"
+  }
+
+  
+  {
     "id": "cc_001",
     "firstName": "Kelly",
     "lastName": "Le bouhris",
-    "position": "Conseillère Clientèle",
+    "position": "Conseiller Clientèle",
     "team": "Équipe 1",
     "email": "pierre.durand@macif.fr",
     "photo": "assets/images/pierre-durand.jpg",
@@ -44,27 +92,7 @@
     "startDate": "2020-01-10"
   },
   
-  {
-    "id": "com_001",
-    "firstName": "Sophie",
-    "lastName": "Bernard",
-    "position": "Conseiller Commercial",
-    "team": "Équipe 1",
-    "email": "sophie.bernard@macif.fr",
-    "photo": "assets/images/sophie-bernard.jpg",
-    "birthday": "1990-03-20",
-    "startDate": "2020-01-10"
-  },
+ 
   
-  {
-    "id": "mgr_002",
-    "firstName": "Luc",
-    "lastName": "Moreau",
-    "position": "Manager d'Équipe",
-    "team": "Équipe 2",
-    "email": "luc.moreau@macif.fr",
-    "photo": "assets/images/luc-moreau.jpg",
-    "birthday": "1978-07-14",
-    "startDate": "2012-05-20"
-  }
+
 ]
