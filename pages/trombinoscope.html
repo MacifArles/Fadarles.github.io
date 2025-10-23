@@ -31,7 +31,6 @@
             </div>
         </div>
     </nav>
-
     <!-- Contenu principal -->
     <main class="main-content">
         <header class="page-header">
@@ -40,7 +39,6 @@
                 <p>Découvrez tous les membres de notre équipe</p>
             </div>
         </header>
-
         <!-- Filtres d'équipe -->
         <section class="team-filters">
             <div class="filters-container">
@@ -54,7 +52,6 @@
                 <button class="filter-btn" data-team="equipe6" data-color="#3498db">Équipe 6</button>
             </div>
         </section>
-
         <!-- Section Direction -->
         <section class="hierarchy-section" id="direction-section">
             <h2 class="section-title">Direction</h2>
@@ -62,7 +59,6 @@
                 <!-- Responsable CRC sera chargé ici -->
             </div>
         </section>
-
         <!-- Section Équipes -->
         <section class="hierarchy-section" id="teams-section">
             <h2 class="section-title">Équipes Commerciales</h2>
@@ -70,20 +66,37 @@
                 <!-- Les équipes seront générées dynamiquement -->
             </div>
         </section>
-
         <!-- Message de chargement -->
         <div id="loading-message" class="loading-message">
             <p>Chargement du trombinoscope...</p>
         </div>
-
         <!-- Message d'erreur -->
         <div id="error-message" class="error-message hidden">
             <p>Erreur lors du chargement des données. Veuillez réessayer.</p>
         </div>
     </main>
-
-    <!-- Scripts -->
+    <!-- Scripts avec diagnostic -->
+    <script>
+        console.log('🔧 Trombinoscope - Chargement des scripts...');
+    </script>
     <script src="../js/data-manager.js"></script>
+    <script>
+        console.log('📦 DataManager chargé:', typeof window.dataManager);
+        if (typeof window.dataManager === 'undefined') {
+            console.error('❌ DataManager non chargé !');
+        }
+    </script>
     <script src="../js/trombinoscope.js"></script>
+    <script>
+        console.log('👥 Trombinoscope.js chargé');
+        // Test de diagnostic
+        if (typeof window.dataManager !== 'undefined') {
+            window.dataManager.getEmployees().then(emp => {
+                console.log(`✅ ${emp.length} employés trouvés pour le trombinoscope`);
+            }).catch(err => {
+                console.error('❌ Erreur chargement employés trombinoscope:', err);
+            });
+        }
+    </script>
 </body>
 </html>
