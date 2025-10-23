@@ -1,361 +1,330 @@
 /**
- * Gestionnaire du trombinoscope avec filtrage par équipe corrigé
- * Affiche direction avec managers et gère correctement le filtrage
- * Niveau de confiance: 92%
+ * Trombinoscope Fad'Arles - Gestion d'affichage des employés
+ * Compatible avec data-manager.js hybride
+ * Niveau de confiance : 95%
  */
 
-class TrombinoscopeManager {
+class TrombinnoscopeManager {
     constructor() {
         this.employees = [];
-        this.filteredEmployees = [];
         this.currentFilter = 'all';
+        this.isLoading = false;
         
-        // Configuration des couleurs d'équipe
+        // Mapping des équipes pour compatibilité
+        this.teamMapping = {
+            'all': 'all',
+            'direction': 'Direction',
+            'equipe1': 'Equipe 1',
+            'equipe2': 'Equipe 2', 
+            'equipe3': 'Equipe 3',
+            'equipe4': 'Equipe 4',
+            'equipe5': 'Equipe 5',
+            'equipe6': 'Equipe 6'
+        };
+        
         this.teamColors = {
-            'equipe1': '#ff6b35',
-            'equipe2': '#f7931e', 
-            'equipe3': '#ffb627',
-            'equipe4': '#e74c3c',
-            'equipe5': '#9b59b6',
-            'equipe6': '#3498db'
+            'Direction': '#2c3e50',
+            'Equipe 1': '#ff6b35',
+            'Equipe 2': '#f7931e',
+            'Equipe 3': '#ffb627',
+            'Equipe 4': '#e74c3c',
+            'Equipe 5': '#9b59b6',
+            'Equipe 6': '#3498db'
         };
         
         this.init();
     }
 
     /**
-     * Initialise le trombinoscope
+     * Initialisation du trombinoscope
      */
-    async init() {
-        try {
-            await this.loadEmployees();
-            this.setupEventListeners();
-            this.renderTrombinoscope();
-            this.hideLoading();
-        } catch (error) {
-            console.error('Erreur lors de l\'initialisation du trombinoscope:', error);
-            this.showError();
-        }
+    init() {
+        console.log('👥 Initialisation du trombinoscope...');
+        this.bindEvents();
+        this.loadEmployees();
     }
 
     /**
-     * Charge les données des employés depuis le fichier JSON
+     * Liaison des événements
      */
-    async loadEmployees() {
-        try {
-            this.employees = await dataManager.getData('employees.json');
-            this.filteredEmployees = [...this.employees];
-            console.log('Employés chargés:', this.employees);
-        } catch (error) {
-            console.error('Erreur de chargement des employés:', error);
-            throw error;
-        }
-    }
-
-    /**
-     * Configure les événements de filtrage
-     */
-    setupEventListeners() {
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        
-        filterButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
+    bindEvents() {
+        // Filtres d'équipe
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
                 const team = e.target.dataset.team;
-                console.log('Filtre sélectionné:', team);
                 this.filterByTeam(team);
                 this.updateActiveFilter(e.target);
             });
         });
-    }
-
-    /**
-     * Filtre les employés par équipe avec logique corrigée
-     * @param {string} teamFilter - Filtre d'équipe à appliquer
-     */
-    filterByTeam(teamFilter) {
-        this.currentFilter = teamFilter;
-        console.log('Application du filtre:', teamFilter);
         
-        if (teamFilter === 'all') {
-            this.filteredEmployees = [...this.employees];
-        } else if (teamFilter === 'direction') {
-            // Direction inclut responsable + tous les managers
-            this.filteredEmployees = this.employees.filter(employee => 
-                employee.position.toLowerCase().includes('responsable') ||
-                employee.position.toLowerCase().includes('manager')
-            );
-        } else {
-            // Filtrage par équipe spécifique (equipe1, equipe2, etc.)
-            const teamNumber = teamFilter.replace('equipe', '');
-            const teamName = `Équipe ${teamNumber}`;
-            
-            this.filteredEmployees = this.employees.filter(employee => 
-                employee.team === teamName
-            );
-            console.log(`Employés filtrés pour ${teamName}:`, this.filteredEmployees);
-        }
+        console.log('✅ Événements du trombinoscope configurés');
+    }
+
+    /**
+     * Chargement des employés
+     */
+    async loadEmployees() {
+        console.log('📥 Chargement des employés pour le trombinoscope...');
         
-        this.renderTrombinoscope();
-    }
-
-    /**
-     * Met à jour l'état visuel du filtre actif
-     * @param {HTMLElement} activeButton - Bouton filtre actif
-     */
-    updateActiveFilter(activeButton) {
-        document.querySelectorAll('.filter-btn').forEach(btn => 
-            btn.classList.remove('active')
-        );
-        activeButton.classList.add('active');
-    }
-
-    /**
-     * Affiche le trombinoscope complet
-     */
-    renderTrombinoscope() {
-        this.renderDirection();
-        this.renderTeams();
-        this.updateVisibility();
-    }
-
-    /**
-     * Affiche la section direction avec responsable et managers
-     */
-    renderDirection() {
-        const directionGrid = document.getElementById('direction-grid');
+        this.showLoading(true);
+        this.hideError();
         
-        if (this.currentFilter === 'all' || this.currentFilter === 'direction') {
-            // Récupération du responsable et des managers
-            const responsable = this.filteredEmployees.find(emp => 
-                emp.position.toLowerCase().includes('responsable')
-            );
-            const managers = this.filteredEmployees.filter(emp => 
-                emp.position.toLowerCase().includes('manager')
-            );
-            
-            let directionHTML = '';
-            
-            // Ajout du responsable en premier
-            if (responsable) {
-                directionHTML += this.createEmployeeCard(responsable, 'responsable');
+        try {
+            // Vérification DataManager
+            if (typeof window.dataManager === 'undefined') {
+                throw new Error('DataManager non disponible');
             }
             
-            // Ajout de tous les managers
-            managers.forEach(manager => {
-                directionHTML += this.createEmployeeCard(manager, 'manager');
-            });
+            // Chargement des employés
+            this.employees = await window.dataManager.getEmployees();
+            console.log(`✅ ${this.employees.length} employés chargés pour le trombinoscope`);
             
-            directionGrid.innerHTML = directionHTML;
-            
-            // Ajustement du style pour plusieurs cartes
-            if ((responsable ? 1 : 0) + managers.length > 1) {
-                directionGrid.style.display = 'grid';
-                directionGrid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
-                directionGrid.style.gap = '1rem';
-                directionGrid.style.justifyContent = 'center';
-                directionGrid.style.maxWidth = '800px';
-                directionGrid.style.margin = '0 auto';
+            // Affichage des employés par équipe
+            if (this.employees.length > 0) {
+                this.logEmployeesByTeam();
+                this.renderAllEmployees();
+                this.showLoading(false);
+            } else {
+                throw new Error('Aucun employé trouvé dans les données');
             }
-        } else {
-            directionGrid.innerHTML = '';
+            
+        } catch (error) {
+            console.error('❌ Erreur chargement trombinoscope:', error);
+            this.showError(`Erreur lors du chargement: ${error.message}`);
+            this.showLoading(false);
         }
     }
 
     /**
-     * Affiche les équipes commerciales
+     * Log des employés par équipe pour debug
      */
-    renderTeams() {
-        const teamsContainer = document.getElementById('teams-container');
-        const teams = this.getTeamsData();
-        
-        teamsContainer.innerHTML = '';
-        
-        teams.forEach(team => {
-            if (team.employees.length > 0) {
-                const teamElement = this.createTeamSection(team);
-                teamsContainer.appendChild(teamElement);
+    logEmployeesByTeam() {
+        const teamStats = {};
+        this.employees.forEach(emp => {
+            if (!teamStats[emp.team]) {
+                teamStats[emp.team] = [];
             }
+            teamStats[emp.team].push(`${emp.firstName} ${emp.lastName}`);
+        });
+        
+        console.log('📊 Répartition des employés par équipe:');
+        Object.entries(teamStats).forEach(([team, members]) => {
+            console.log(`   ${team}: ${members.length} membre(s) - ${members.join(', ')}`);
         });
     }
 
     /**
-     * Organise les employés par équipe avec logique corrigée
-     * @returns {Array} - Données organisées par équipe
+     * Affichage de tous les employés
      */
-    getTeamsData() {
-        const teams = [];
+    renderAllEmployees() {
+        console.log('🖼️ Rendu de tous les employés...');
         
-        // Traite chaque équipe numérotée
-        for (let i = 1; i <= 6; i++) {
-            const teamName = `Équipe ${i}`;
-            const teamKey = `equipe${i}`;
-            
-            // Logique de filtrage corrigée
-            let shouldShowTeam = false;
-            
-            if (this.currentFilter === 'all') {
-                shouldShowTeam = true;
-            } else if (this.currentFilter === teamKey) {
-                shouldShowTeam = true;
-            } else if (this.currentFilter === 'direction') {
-                shouldShowTeam = false; // Ne pas montrer les équipes en mode direction
-            }
-            
-            if (shouldShowTeam) {
-                const teamEmployees = this.employees.filter(emp => 
-                    emp.team === teamName && 
-                    !emp.position.toLowerCase().includes('responsable')
-                );
-                
-                if (teamEmployees.length > 0) {
-                    teams.push({
-                        name: teamName,
-                        key: teamKey,
-                        color: this.teamColors[teamKey],
-                        employees: teamEmployees
-                    });
-                }
-            }
-        }
+        // Rendu de la direction
+        this.renderDirection();
         
-        console.log('Équipes à afficher:', teams);
-        return teams;
+        // Rendu des équipes commerciales
+        this.renderTeams();
     }
 
     /**
-     * Crée l'élément HTML d'une équipe avec logo
-     * @param {Object} team - Données de l'équipe
-     * @returns {HTMLElement} - Élément DOM de l'équipe
+     * Rendu de la section Direction
      */
-    createTeamSection(team) {
-        const section = document.createElement('div');
-        section.className = 'team-section';
-        section.style.setProperty('--team-color', team.color);
+    renderDirection() {
+        const directionGrid = document.getElementById('direction-grid');
+        if (!directionGrid) return;
         
-        // Génération du chemin du logo basé sur le numéro d'équipe
-        const teamNumber = team.key.replace('equipe', '');
-        const logoPath = `assets/images/equipe-${teamNumber}.png`;
+        const directionEmployees = this.employees.filter(emp => emp.team === 'Direction');
+        console.log(`👑 Direction: ${directionEmployees.length} membre(s)`);
         
-        const conseillerClientele = team.employees.filter(emp => 
-            emp.position.toLowerCase().includes('conseiller clientèle')
-        );
-        const commerciaux = team.employees.filter(emp => 
-            emp.position.toLowerCase().includes('conseiller commercial')
-        );
+        if (directionEmployees.length === 0) {
+            directionGrid.innerHTML = '<p class="no-employees">Aucun membre de la direction trouvé</p>';
+            return;
+        }
         
-        const totalCommerciaux = conseillerClientele.length + commerciaux.length;
+        directionGrid.innerHTML = directionEmployees.map(employee => 
+            this.createEmployeeCard(employee, 'direction')
+        ).join('');
+    }
+
+    /**
+     * Rendu des équipes commerciales
+     */
+    renderTeams() {
+        const teamsContainer = document.getElementById('teams-container');
+        if (!teamsContainer) return;
         
-        section.innerHTML = `
-            <div class="team-header">
-                <img src="${logoPath}" alt="Logo ${team.name}" class="team-logo" 
-                     onerror="this.style.display='none';">
-                <div class="team-info">
-                    <h3 class="team-name">${team.name}</h3>
-                    <div class="team-stats">
-                        ${team.employees.length} membre(s) - ${totalCommerciaux} commercial(aux)
+        const teams = ['Equipe 1', 'Equipe 2', 'Equipe 3', 'Equipe 4', 'Equipe 5', 'Equipe 6'];
+        
+        teamsContainer.innerHTML = teams.map(teamName => {
+            const teamEmployees = this.employees.filter(emp => emp.team === teamName);
+            console.log(`🏢 ${teamName}: ${teamEmployees.length} membre(s)`);
+            
+            return `
+                <div class="team-section" data-team="${teamName.toLowerCase().replace(' ', '')}">
+                    <div class="team-header" style="background: ${this.teamColors[teamName]}">
+                        <img src="../assets/images/equipe-${teamName.split(' ')[1]}.png" 
+                             alt="Logo ${teamName}" 
+                             class="team-logo"
+                             onerror="this.style.display='none'">
+                        <h3>${teamName}</h3>
+                        <span class="team-count">${teamEmployees.length} membre(s)</span>
+                    </div>
+                    <div class="employees-grid">
+                        ${teamEmployees.length > 0 
+                            ? teamEmployees.map(emp => this.createEmployeeCard(emp, teamName.toLowerCase().replace(' ', ''))).join('')
+                            : '<p class="no-employees">Aucun membre dans cette équipe</p>'
+                        }
                     </div>
                 </div>
-            </div>
-            <div class="employees-grid team-employees-grid">
-                ${team.employees.map(employee => 
-                    this.createEmployeeCard(employee, this.getEmployeeType(employee))
-                ).join('')}
-            </div>
-        `;
-        
-        return section;
+            `;
+        }).join('');
     }
 
     /**
-     * Détermine le type d'employé pour le style
-     * @param {Object} employee - Données de l'employé
-     * @returns {string} - Type d'employé
+     * Création d'une carte employé
      */
-    getEmployeeType(employee) {
-        const position = employee.position.toLowerCase();
-        if (position.includes('manager')) return 'manager';
-        if (position.includes('conseiller clientèle')) return 'conseiller-clientele';
-        return 'conseiller-commercial';
-    }
-
-    /**
-     * Crée la carte HTML d'un employé
-     * @param {Object} employee - Données de l'employé
-     * @param {string} type - Type d'employé pour le style
-     * @returns {string} - HTML de la carte employé
-     */
-    createEmployeeCard(employee, type) {
-        const initials = this.getInitials(employee.firstName, employee.lastName);
-        const photoSrc = employee.photo || '';
+    createEmployeeCard(employee, teamClass) {
+        const birthDate = employee.birthday ? new Date(employee.birthday).toLocaleDateString('fr-FR') : '';
+        const startDate = employee.startDate ? new Date(employee.startDate).toLocaleDateString('fr-FR') : '';
         
         return `
-            <div class="employee-card ${type}" data-employee-id="${employee.id}">
-                ${type === 'manager' ? '<div class="position-badge">Manager</div>' : ''}
-                ${photoSrc ? 
-                    `<img src="${photoSrc}" alt="${employee.firstName} ${employee.lastName}" class="employee-photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                     <div class="employee-photo placeholder" style="display:none;">${initials}</div>` :
-                    `<div class="employee-photo placeholder">${initials}</div>`
-                }
-                <div class="employee-name">${employee.firstName} ${employee.lastName}</div>
-                <div class="employee-position">${employee.position}</div>
-                <div class="employee-email">${employee.email}</div>
+            <div class="employee-card ${teamClass}" data-team="${employee.team}">
+                <div class="employee-photo-container">
+                    <img src="${employee.photo || '../assets/images/default-avatar.png'}" 
+                         alt="Photo de ${employee.firstName} ${employee.lastName}"
+                         class="employee-photo"
+                         onerror="this.src='../assets/images/default-avatar.png'">
+                </div>
+                <div class="employee-info">
+                    <h4 class="employee-name">${employee.firstName} ${employee.lastName}</h4>
+                    <p class="employee-position">${employee.position}</p>
+                    ${employee.email ? `<p class="employee-email">📧 ${employee.email}</p>` : ''}
+                    ${birthDate ? `<p class="employee-birthday">🎂 ${birthDate}</p>` : ''}
+                    ${startDate ? `<p class="employee-start">📅 Arrivée: ${startDate}</p>` : ''}
+                    <span class="employee-team-badge" style="background: ${this.teamColors[employee.team] || '#ccc'}">
+                        ${employee.team}
+                    </span>
+                </div>
             </div>
         `;
     }
 
     /**
-     * Génère les initiales d'un employé
-     * @param {string} firstName - Prénom
-     * @param {string} lastName - Nom
-     * @returns {string} - Initiales
+     * Filtrage par équipe
      */
-    getInitials(firstName, lastName) {
-        return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
-    }
-
-    /**
-     * Met à jour la visibilité des sections selon le filtre
-     */
-    updateVisibility() {
-        const directionSection = document.getElementById('direction-section');
-        const teamsSection = document.getElementById('teams-section');
+    filterByTeam(filterKey) {
+        console.log(`🔍 Filtrage par équipe: ${filterKey}`);
         
-        if (this.currentFilter === 'direction') {
-            directionSection.style.display = 'block';
-            teamsSection.style.display = 'none';
-        } else if (this.currentFilter === 'all') {
-            directionSection.style.display = 'block';
-            teamsSection.style.display = 'block';
+        this.currentFilter = filterKey;
+        const targetTeam = this.teamMapping[filterKey];
+        
+        // Masquer toutes les sections
+        document.querySelectorAll('.hierarchy-section').forEach(section => {
+            section.style.display = 'none';
+        });
+        
+        document.querySelectorAll('.team-section').forEach(section => {
+            section.style.display = 'none';
+        });
+        
+        if (filterKey === 'all') {
+            // Afficher toutes les sections
+            document.querySelectorAll('.hierarchy-section').forEach(section => {
+                section.style.display = 'block';
+            });
+            document.querySelectorAll('.team-section').forEach(section => {
+                section.style.display = 'block';
+            });
+        } else if (filterKey === 'direction') {
+            // Afficher seulement la direction
+            document.getElementById('direction-section').style.display = 'block';
         } else {
-            // Filtrage par équipe spécifique
-            directionSection.style.display = 'none';
-            teamsSection.style.display = 'block';
+            // Afficher seulement l'équipe sélectionnée
+            document.getElementById('teams-section').style.display = 'block';
+            const teamSection = document.querySelector(`[data-team="${filterKey}"]`);
+            if (teamSection) {
+                teamSection.style.display = 'block';
+            }
         }
+        
+        console.log(`✅ Filtrage appliqué: ${targetTeam || 'Toutes les équipes'}`);
     }
 
     /**
-     * Masque le message de chargement
+     * Mise à jour du filtre actif
      */
-    hideLoading() {
+    updateActiveFilter(activeBtn) {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        activeBtn.classList.add('active');
+    }
+
+    /**
+     * Affichage du loading
+     */
+    showLoading(show) {
         const loadingMessage = document.getElementById('loading-message');
         if (loadingMessage) {
-            loadingMessage.style.display = 'none';
+            loadingMessage.style.display = show ? 'block' : 'none';
+        }
+        this.isLoading = show;
+    }
+
+    /**
+     * Affichage des erreurs
+     */
+    showError(message) {
+        const errorMessage = document.getElementById('error-message');
+        if (errorMessage) {
+            errorMessage.innerHTML = `<p>${message}</p>`;
+            errorMessage.classList.remove('hidden');
+            errorMessage.style.display = 'block';
         }
     }
 
     /**
-     * Affiche le message d'erreur
+     * Masquage des erreurs
      */
-    showError() {
+    hideError() {
         const errorMessage = document.getElementById('error-message');
-        const loadingMessage = document.getElementById('loading-message');
-        
-        if (loadingMessage) loadingMessage.style.display = 'none';
-        if (errorMessage) errorMessage.classList.remove('hidden');
+        if (errorMessage) {
+            errorMessage.classList.add('hidden');
+            errorMessage.style.display = 'none';
+        }
+    }
+
+    /**
+     * Rechargement des données
+     */
+    async reload() {
+        console.log('🔄 Rechargement du trombinoscope...');
+        if (window.dataManager && window.dataManager.clearCache) {
+            window.dataManager.clearCache();
+        }
+        await this.loadEmployees();
     }
 }
 
-// Initialisation automatique du trombinoscope
-document.addEventListener('DOMContentLoaded', () => {
-    const trombinoscopeManager = new TrombinoscopeManager();
+// Initialisation globale
+let trombinnoscopeManager;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 DOM chargé, initialisation du trombinoscope...');
+    
+    // Attendre que DataManager soit chargé
+    function initTrombinoscope() {
+        if (typeof window.dataManager !== 'undefined') {
+            trombinnoscopeManager = new TrombinnoscopeManager();
+            console.log('✅ Trombinoscope initialisé avec succès');
+        } else {
+            console.log('⏳ Attente du DataManager...');
+            setTimeout(initTrombinoscope, 100);
+        }
+    }
+    
+    initTrombinoscope();
 });
+
+// Export global pour debug
+window.trombinnoscopeManager = trombinnoscopeManager;
