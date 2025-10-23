@@ -118,9 +118,35 @@
     box-shadow: 0 15px 40px 0 rgba(31, 38, 135, 0.4);
 }
 
+/* Styles pour les logos d'équipe */
 .team-header {
     text-align: center;
     margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.team-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.3rem;
+    transition: all 0.3s ease;
+}
+
+.team-logo:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.team-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .team-name {
@@ -277,6 +303,17 @@
     .header-content h1 {
         font-size: 2rem;
     }
+    
+    /* Responsive pour les logos */
+    .team-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .team-logo {
+        width: 35px;
+        height: 35px;
+    }
 }
 
 /* Animation d'apparition */
@@ -299,46 +336,8 @@
     animation: fadeInUp 0.8s ease-out;
 }
 
-/* Ajout des styles pour les logos d'équipe */
-.team-header {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-}
-
-.team-logo {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 0.3rem;
-    transition: all 0.3s ease;
-}
-
-.team-logo:hover {
-    transform: scale(1.1);
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.team-info {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Responsive pour les logos */
-@media (max-width: 768px) {
-    .team-header {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    
-    .team-logo {
-        width: 35px;
-        height: 35px;
-    }
+/* Lien actif dans la navigation */
+.nav-menu a.active {
+    background: var(--primary-warm);
+    color: white;
 }
